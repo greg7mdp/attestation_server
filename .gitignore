@@ -1,0 +1,9 @@
+build/
+*.o
+*.obj
+*.pdb
+*.pyc
+.vscode
+.vs/
+TAGS
+
