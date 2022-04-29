@@ -1,22 +1,12 @@
-#include "lib1.h"
+// ------- doctest stuff ---------------------
 #define DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL
 #include <doctest/doctest.h>
 
 DOCTEST_SYMBOL_IMPORT void from_dll();
+// ------- end of doctest stuff --------------
 
-using namespace lib1;
-
-int fact(int n) {
-    return n <= 1 ? n : fact(n - 1) * n;
-}
-TEST_CASE("testing the factorial function") {
-    CHECK(fact(0) == 1); // should fail
-    CHECK(fact(1) == 1);
-    CHECK(fact(2) == 2);
-    CHECK(fact(3) == 6);
-    CHECK(fact(10) == 3628800);
-}
-
+#include <libxrpl/lib1.h>
+using namespace xrpl;
 
 int
 main(int argc, char** argv)
@@ -34,18 +24,9 @@ main(int argc, char** argv)
 
     // start actual work
     // -----------------
-    hello hello{};
-    int32_t error_code = hello.saySomething("Hello Modern C++ Development");
-    if (error_code > 0)
-    {
-        return error_code;
-    }
-#ifdef WITH_OPENSSL
-    error_code = hello.saySomethingHashed("Hello Modern C++ Development");
-    if (error_code > 0)
-    {
-        return error_code;
-    }
-#endif
     return 0;
+}
+
+
+TEST_CASE("Attestation Server tests") {
 }
