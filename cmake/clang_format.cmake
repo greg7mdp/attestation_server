@@ -1,8 +1,3 @@
-# MIT License 
-# Copyright (c) 2018-Today Michele Adduci <adduci@tutanota.com>
-#
-# Clang-Format instructions
-
 find_program(CLANG_FORMAT_BIN NAMES clang-format)
 
 if(CLANG_FORMAT_BIN)

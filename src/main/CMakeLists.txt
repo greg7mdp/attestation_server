@@ -43,3 +43,4 @@ target_include_directories(${TARGET_NAME}
 
 # link against hellolib
 target_link_libraries(${TARGET_NAME} PUBLIC lib1)
+target_link_libraries(${TARGET_NAME} PRIVATE doctest::doctest)

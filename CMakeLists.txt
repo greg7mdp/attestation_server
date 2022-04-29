@@ -42,13 +42,17 @@ set(CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR} ${CMAKE_PREFIX_PATH})
 #####################################
 # Define Options
 #####################################
-option(BUILD_TESTING "Build tests" FALSE)
-option(BUILD_SHARED_LIBS "Build shared libraries" FALSE)
+option(BUILD_SHARED_LIBS "Build shared libraries" TRUE)
 option(BUILD_WITH_MT "Build libraries as MultiThreaded DLL (Windows Only)" TRUE)
+option(RUN_CPPCHECK_WHEN_BUILDING FALSE)
 
 #####################################
 # Define CMake Module Imports
 #####################################
+include(CTest)       # creates a BUILD_TESTING option that selects whether to enable testing support (ON by default)
+find_package(doctest REQUIRED)
+include_directories(${DOCTEST_INCLUDE_DIR})
+
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 include(InstallRequiredSystemLibraries)

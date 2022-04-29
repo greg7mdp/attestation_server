@@ -24,7 +24,6 @@ install(TARGETS
 install(
   FILES 
     ${CMAKE_SOURCE_DIR}/src/lib1/lib1.h 
-    ${CMAKE_BINARY_DIR}/exports/lib1_export.h
   DESTINATION 
     include/lib1)
 

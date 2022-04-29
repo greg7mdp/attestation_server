@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <string>
 
 #include "lib1_export.h"

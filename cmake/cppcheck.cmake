@@ -1,14 +1,8 @@
-# MIT License 
-# Copyright (c) 2018-Today Michele Adduci <adduci@tutanota.com>
-#
-# cppcheck instructions
-
 find_program(CPPCHECK_BIN NAMES cppcheck)
 
-if(CPPCHECK_BIN)
+if(CPPCHECK_BIN AND RUN_CPPCHECK_WHEN_BUILDING)
   message(STATUS "Found: cppcheck")
-  list(
-        APPEND CMAKE_CXX_CPPCHECK 
+  set(CMAKE_CXX_CPPCHECK 
             "${CPPCHECK_BIN}"
             "--enable=all"
             "--enable=warning,performance,portability,information"

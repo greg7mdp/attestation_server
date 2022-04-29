@@ -42,6 +42,8 @@ target_compile_definitions(${TARGET_NAME} PRIVATE ${compiler_definitions} $<$<BO
 # set target link options as defined in the cmake/compiler_options.cmake Module
 target_link_options(${TARGET_NAME} PRIVATE ${linker_flags})
 
+find_package(doctest REQUIRED)
+
 # include all the necessary directories
 target_include_directories(${TARGET_NAME}
   PUBLIC
@@ -58,7 +60,9 @@ if(OPENSSL_FOUND)
   target_link_libraries(${TARGET_NAME} PUBLIC OpenSSL::SSL OpenSSL::Crypto)
 endif()
 
-if(BUILD_TESTING)
+target_link_libraries(${TARGET_NAME} PRIVATE doctest::doctest)
+
+if(XXX AND BUILD_TESTING)
   list(APPEND TEST_CASES
     lib1_test
   )

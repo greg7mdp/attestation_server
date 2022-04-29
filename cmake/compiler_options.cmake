@@ -1,8 +1,3 @@
-# MIT License 
-# Copyright (c) 2018-Today Michele Adduci <adduci@tutanota.com>
-#
-# Compiler options with hardening flags
-
 if(MSVC)
 
   list(APPEND compiler_options 
@@ -38,14 +33,11 @@ else(MSVC)
   )
  
  list(APPEND linker_flags
- $<$<NOT:$<CXX_COMPILER_ID:AppleClang>>:-Wl,-z,defs>
- $<$<NOT:$<CXX_COMPILER_ID:AppleClang>>:-Wl,-z,now>
- $<$<NOT:$<CXX_COMPILER_ID:AppleClang>>:-Wl,-z,relro>
  # Clang doesn't support these hardening flags
  $<$<AND:$<NOT:$<CXX_COMPILER_ID:AppleClang>>,$<NOT:$<CXX_COMPILER_ID:Clang>>,$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>>:-Wl,-pie>
  $<$<AND:$<NOT:$<CXX_COMPILER_ID:AppleClang>>,$<NOT:$<CXX_COMPILER_ID:Clang>>,$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>>:-fpie>
  $<$<AND:$<NOT:$<CXX_COMPILER_ID:AppleClang>>,$<NOT:$<CXX_COMPILER_ID:Clang>>,$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>>:-pipe>
- $<$<AND:$<NOT:$<CXX_COMPILER_ID:AppleClang>>,$<NOT:$<CXX_COMPILER_ID:Clang>>,$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>>:-static-libstdc++>
+ # $<$<AND:$<NOT:$<CXX_COMPILER_ID:AppleClang>>,$<NOT:$<CXX_COMPILER_ID:Clang>>,$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>>:-static-libstdc++>
  $<$<CONFIG:DEBUG>:-fno-omit-frame-pointer>
  $<$<CONFIG:DEBUG>:-fsanitize=address>
  $<$<CONFIG:DEBUG>:-fsanitize=leak>
