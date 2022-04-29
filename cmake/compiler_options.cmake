@@ -18,6 +18,7 @@ if(MSVC)
     $<$<BOOL:${BUILD_SHARED_LIBS}>:/LTCG>
   )
 
+  set(MSVC_RUNTIME_TYPE $<IF:$<BOOL:${BUILD_WITH_MT}>,MultiThreaded$<$<CONFIG:Debug>:Debug>,MultiThreaded$<$<CONFIG:Debug>:Debug>>DLL)
 
 else(MSVC)
 
