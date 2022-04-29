@@ -1,7 +1,7 @@
 #####################################
 # Define Project-Wide Settings
 #####################################
-cmake_minimum_required(VERSION 3.15.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.16.0 FATAL_ERROR)
 
 # Enables the Visibility Property on all target types
 cmake_policy(SET CMP0063 NEW)
@@ -50,8 +50,12 @@ option(RUN_CPPCHECK_WHEN_BUILDING FALSE)
 # Define CMake Module Imports
 #####################################
 include(CTest)       # creates a BUILD_TESTING option that selects whether to enable testing support (ON by default)
+#find_package(doctest REQUIRED)
+#include_directories(${DOCTEST_INCLUDE_DIR})
+
+find_package(fmt)
+find_package(Boost)
 find_package(doctest REQUIRED)
-include_directories(${DOCTEST_INCLUDE_DIR})
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)

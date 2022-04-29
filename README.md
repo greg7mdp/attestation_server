@@ -33,10 +33,15 @@ The project can be built using the following commands:
 ```shell
 cd /path/to/this/project
 mkdir -p build # md build (on Windows)
-cd build
-conan install ..
-cmake -DBUILD_TESTING=TRUE -DBUILD_SHARED_LIBS=TRUE ..
+cd build 
+conan install .. --install-folder cmake-build-release --build=missing
+cmake .. -DCMAKE_TOOLCHAIN_FILE=cmake-build-release/conan_toolchain.cmake
 cmake --build .
+```
+
+optional commands:
+
+```
 cmake --build . --target format
 cmake --build . --target package
 ```

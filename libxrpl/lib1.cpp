@@ -1,6 +1,9 @@
 #define DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL
 #define DOCTEST_CONFIG_IMPLEMENT
 #include <doctest/doctest.h>
+#include <boost/lambda/lambda.hpp>
+#include <boost/system.hpp>
+namespace sys = boost::system;
 
 #include <string>
 
