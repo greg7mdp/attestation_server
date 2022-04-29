@@ -31,7 +31,7 @@ DOCTEST_SYMBOL_EXPORT void from_dll() {} // force the creation of a .lib file wi
 #include <sstream>
 #endif
 
-using namespace lib1;
+using namespace xrpl;
 
 int32_t
 hello::saySomething(const std::string& something) const noexcept

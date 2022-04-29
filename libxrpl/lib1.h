@@ -1,9 +1,7 @@
-#include <cstdint>
-#include <string>
+#include "common.h"
 
-#include "libxrpl_export.h"
 
-namespace lib1 {
+namespace xrpl {
 class LIBXRPL_EXPORT hello
 {
 public:
