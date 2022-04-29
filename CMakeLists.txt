@@ -66,4 +66,21 @@ include(${CMAKE_SOURCE_DIR}/cmake/dependencies.cmake)
 #####################################
 # Define Targets
 #####################################
-add_subdirectory(src)
+add_subdirectory(libxrpl)
+add_subdirectory(server)
+
+#####################################
+# Define Install Targets
+#####################################
+install(TARGETS libxrpl attestation_server
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION bin
+  ARCHIVE DESTINATION lib
+  PUBLIC_HEADER DESTINATION include
+)
+
+install(FILES ${CMAKE_SOURCE_DIR}/lib/lib1.h 
+        DESTINATION include/lib1)
+
+install(FILES ${CMAKE_SOURCE_DIR}/LICENSE
+        DESTINATION .)
