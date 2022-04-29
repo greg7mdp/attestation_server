@@ -12,22 +12,15 @@ add_subdirectory(lib1)
 #####################################
 # Define Install Targets
 #####################################
-install(TARGETS
-  lib1
-  attestation_server
+install(TARGETS lib1 attestation_server
   RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
+  LIBRARY DESTINATION bin
   ARCHIVE DESTINATION lib
   PUBLIC_HEADER DESTINATION include
 )
 
-install(
-  FILES 
-    ${CMAKE_SOURCE_DIR}/src/lib1/lib1.h 
-  DESTINATION 
-    include/lib1)
+install(FILES ${CMAKE_SOURCE_DIR}/src/lib1/lib1.h 
+        DESTINATION include/lib1)
 
-install(FILES  
-  ${CMAKE_SOURCE_DIR}/LICENSE
-  
-DESTINATION .)
+install(FILES ${CMAKE_SOURCE_DIR}/LICENSE
+        DESTINATION .)
