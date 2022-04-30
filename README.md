@@ -6,11 +6,9 @@ Attestation Server for XRPL sidechains
 
 ## Requirements
 
-* `C++20 compiler` recent, with coroutine support (g++-11, )
+* `C++20 compiler` recent, with coroutine support (g++-11, clang 13.1.6 on macos, vs 2022 on windows)
 * [`cmake`](https://cmake.org) 3.16+
 * [`conan`](https://conan.io) 1.47+
-* [`doctest`](https://github.com/doctest/doctest) 2.4.6+
-* [`boost`](https://www.boost.org/) 1.78+
 
 ## Optional:
 
@@ -49,7 +47,7 @@ g++-11 --version
 
 ```shell
 cd /path/to/this/project
-mkdir -p build # md build (on Windows)
+mkdir build
 cd build 
 conan install .. --install-folder cmake-build-release --build=missing -s compiler.cppstd=20
 cmake .. -DCMAKE_TOOLCHAIN_FILE=cmake-build-release/conan_toolchain.cmake -DCMAKE_CXX_COMPILER=g++-11
@@ -59,12 +57,19 @@ cmake --build .
 ### macos
 
 
-update xcode if necessary, and then build the project
+Update xcode command line tools if necessary, and then build the project. I have verified that the project builds fine with Apple clang version 13.1.6. To update the xcode command line tool you may do:
+
+```
+sudo rm -rf /Library/Developer/CommandLineTools
+xcode-select --install
+```
+
+Once you have a recent version of clang installed, build as usual:
 
 
 ```shell
 cd /path/to/this/project
-mkdir -p build # md build (on Windows)
+mkdir build
 cd build 
 conan install .. --install-folder cmake-build-release --build=missing -s compiler.cppstd=20
 cmake .. -DCMAKE_TOOLCHAIN_FILE=cmake-build-release/conan_toolchain.cmake -DCMAKE_CXX_COMPILER=g++
@@ -76,7 +81,7 @@ cmake --build .
 
 ```shell
 cd /path/to/this/project
-mkdir -p build # md build (on Windows)
+mkdir build 
 cd build 
 conan install .. --install-folder cmake-build --output-folder cmake-build --build=missing -s compiler.cppstd=20
 cmake .. -DCMAKE_TOOLCHAIN_FILE=cmake-build/conan_toolchain.cmake
