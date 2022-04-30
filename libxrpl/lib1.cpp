@@ -5,6 +5,66 @@
 #include <boost/system.hpp>
 namespace sys = boost::system;
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#if 0
+
+#include <boost/asio.hpp>
+#include <boost/asio/experimental/as_tuple.hpp>
+#include <boost/asio/experimental/awaitable_operators.hpp>
+#include <boost/asio/experimental/channel.hpp>
+#include <iostream>
+
+using boost::asio::awaitable;
+using boost::asio::buffer;
+using boost::asio::co_spawn;
+using boost::asio::detached;
+using boost::asio::experimental::as_tuple;
+using boost::asio::experimental::channel;
+using boost::asio::io_context;
+using boost::asio::ip::tcp;
+using boost::asio::steady_timer;
+using boost::asio::use_awaitable;
+namespace this_coro = boost::asio::this_coro;
+using namespace boost::asio::experimental::awaitable_operators;
+using namespace std::literals::chrono_literals;
+
+using token_channel = channel<void(boost::system::error_code, std::size_t)>;
+
+awaitable<void> produce_tokens(std::size_t bytes_per_token,
+    steady_timer::duration token_interval, token_channel& tokens)
+{
+  steady_timer timer(co_await this_coro::executor);
+  for (;;)
+  {
+    co_await tokens.async_send(
+        boost::system::error_code{}, bytes_per_token,
+        use_awaitable);
+
+    timer.expires_after(token_interval);
+    co_await timer.async_wait(use_awaitable);
+  }
+}
+
+#endif
+
+
+
+
+
+
 #include <string>
 
 static int fact(int n) {

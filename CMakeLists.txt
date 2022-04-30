@@ -18,6 +18,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE) # Generate the compile_commands.json file
 
+set(CMAKE_VERBOSE_MAKEFILE 1)
+
 # Set the Relative Path Configurations
 set(CMAKE_SKIP_BUILD_RPATH FALSE)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)

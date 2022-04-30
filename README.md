@@ -36,8 +36,8 @@ The project can be built using the following commands:
 cd /path/to/this/project
 mkdir -p build # md build (on Windows)
 cd build 
-conan install .. --install-folder cmake-build-release --build=missing
-cmake .. -DCMAKE_TOOLCHAIN_FILE=cmake-build-release/conan_toolchain.cmake
+conan install .. --install-folder cmake-build-release --build=missing -s compiler.cppstd=20
+cmake .. -DCMAKE_TOOLCHAIN_FILE=cmake-build-release/conan_toolchain.cmake # -DCMAKE_CXX_COMPILER=clang++-12
 cmake --build .
 ```
 
