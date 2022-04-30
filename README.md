@@ -6,12 +6,16 @@ Attestation Server for XRPL sidechains
 
 ## Requirements
 
-* C++20 compiler 
-* [`cmake`](https://cmake.org) 3.10+
-* [`conan`](https://conan.io) 1.28+
+* `C++20 compiler` 
+* [`cmake`](https://cmake.org) 3.16+
+* [`conan`](https://conan.io) 1.47+
 * [`doctest`](https://github.com/doctest/doctest)
-* `cppcheck` (optional)
-* `clang-format` (optional)
+* [`boost`](https://www.boost.org/) 1.78+
+
+## Optional:
+
+* `cppcheck`
+* `clang-format`
 
 ## Features
 
