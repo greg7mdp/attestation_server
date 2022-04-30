@@ -56,8 +56,14 @@ cmake --build .
 
 ### macos
 
+install conan and cmake if necessary using brew:
 
-Update xcode command line tools if necessary, and then build the project. I have verified that the project builds fine with Apple clang version 13.1.6. To update the xcode command line tool you may do:
+```
+brew install conan
+brew install cmake
+```
+
+Update xcode command line tools if necessary. I have verified that the project builds fine with Apple clang version 13.1.6. To update the xcode command line tool you may do:
 
 ```
 sudo rm -rf /Library/Developer/CommandLineTools
@@ -83,7 +89,8 @@ cmake --build .
 cd /path/to/this/project
 mkdir build 
 cd build 
-conan install .. --install-folder cmake-build --output-folder cmake-build --build=missing -s compiler.cppstd=20
+conan install .. --install-folder cmake-build --output-folder cmake-build --build=missing -s compiler.cppstd=20 -s build_type=Release
+conan install .. --install-folder cmake-build --output-folder cmake-build --build=missing -s compiler.cppstd=20 -s build_type=Debug
 cmake .. -DCMAKE_TOOLCHAIN_FILE=cmake-build/conan_toolchain.cmake
 cmake --build .  --config Release
 ```
