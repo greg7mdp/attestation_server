@@ -2,6 +2,7 @@
 #define LIBXRPL_BASE58_H_INCLUDED
 
 #include "Common.h"
+#include "SafeCast.h"
 
 namespace xrpl {
 
@@ -17,19 +18,20 @@ namespace xrpl {
     };
 
     template <class T>
-    std::optional<T> parseBase58(ustring_view  s);
+    std::optional<T> parseBase58(ustring_view  sv);
 
     template <class T>
-    std::optional<T> parseBase58(TokenType type, ustring_view s);
+    std::optional<T> parseBase58(TokenType type, ustring_view sv);
 
     // Encode data in Base58Check format using XRPL alphabet
     //  For details on the format see
     //  https://xrpl.org/base58-encodings.html#base58-encodings
-    std::string encodeBase58Token(TokenType type, ustring_view data);
+    std::string encodeBase58Token(TokenType type, ustring_view sv);
 
     // Decode a token of given type encoded using Base58Check and the XRPL alphabet
-    std::string decodeBase58Token(ustring_view s, TokenType type);
-}
+    std::string decodeBase58Token(ustring_view sv, TokenType type);
+    
+} // namespace xrpl
 
 
 #endif // LIBXRPL_BASE58_H_INCLUDED
