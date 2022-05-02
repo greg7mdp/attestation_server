@@ -3,7 +3,7 @@
 #####################################
 set(TARGET_NAME attestation_server)
 set(TARGET_INCLUDE_FOLDER ${CMAKE_CURRENT_SOURCE_DIR})
-set(TARGET_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
+set(TARGET_SOURCES main.cpp Server.cpp)
 
 #####################################
 # Support IDE Visualization
