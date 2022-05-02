@@ -29,11 +29,8 @@ digest(void const* data, std::size_t size) noexcept
     return static_cast<typename Hasher::result_type>(h);
 }
 
-template <
-    class Hasher,
-    class T,
-    std::size_t N,
-    class = std::enable_if_t<sizeof(T) == 1>>
+template <class Hasher, class T, std::size_t N,
+          class = std::enable_if_t<sizeof(T) == 1>>
 static typename Hasher::result_type
 digest(std::array<T, N> const& v)
 {
@@ -74,11 +71,10 @@ namespace detail {
  * file COPYING or http://www.opensource.org/licenses/mit-license.php.
  */
 static std::string
-encodeBase58(
-    void const* message,
-    std::size_t size,
-    void* temp,
-    std::size_t temp_size)
+encodeBase58(void const* message,
+             std::size_t size,
+             void* temp,
+             std::size_t temp_size)
 {
     auto pbegin = reinterpret_cast<unsigned char const*>(message);
     auto const pend = pbegin + size;

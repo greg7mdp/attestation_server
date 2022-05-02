@@ -38,6 +38,8 @@ namespace xrpl {
             @note The operator<< function is deliberately omitted
             to avoid accidental exposure of secret key material.
         */
+        std::string to_string() const;
+        
     };
 
     bool operator==(SecretKey const& lhs, SecretKey const& rhs)

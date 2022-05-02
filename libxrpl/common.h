@@ -13,6 +13,7 @@
 
 namespace xrpl {
         
+    using ustring      = std::basic_string<std::uint8_t>;
     using ustring_view = std::basic_string_view<std::uint8_t>;
 
     template <std::size_t num_bits, class Tag = void>
@@ -58,6 +59,8 @@ namespace xrpl {
     };
 
     void secure_erase(void* dest, std::size_t bytes);
+    void LogThrow(std::string const& title);
+    [[noreturn]] void LogicError(std::string const& s) noexcept;
     
 } // namespace xrpl
 
