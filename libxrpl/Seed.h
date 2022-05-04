@@ -25,7 +25,7 @@ namespace xrpl {
         explicit Seed(uint128 const& seed);
         /** @} */
 
-        constexpr ustring_view data() const
+        constexpr ustring_view view() const
         {
             return { &buf_[0],  buf_.size() };
         }
@@ -64,9 +64,9 @@ namespace xrpl {
     std::optional<Seed> parseRippleLibSeed(ustring_view s);
 
     /** Format a seed as a Base58 string */
-    inline std::string toBase58(Seed const& seed)
+    inline ustring toBase58(Seed const& seed)
     {
-        return encodeBase58Token(TokenType::FamilySeed, seed.data());
+        return encodeBase58Token(TokenType::FamilySeed, seed.view());
     }
 
 

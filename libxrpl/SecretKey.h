@@ -3,14 +3,10 @@
 
 #include "Common.h"
 #include "Base58.h"
+#include "PublicKey.h"
 #include "Seed.h"
 
 namespace xrpl {
-
-    enum class KeyType {
-        secp256k1 = 0,
-        ed25519 = 1,
-    };
 
     class SecretKey
     {
@@ -29,9 +25,13 @@ namespace xrpl {
         SecretKey(std::array<std::uint8_t, 32> const& data);
         SecretKey(ustring_view slice);
 
-        constexpr ustring_view data() const
+        constexpr ustring_view view() const
         {
             return { &buf_[0], sizeof(buf_) };
+        }
+
+        std::uint8_t const* data() const {
+            return  &buf_[0];
         }
 
         /** Convert the secret key to a hexadecimal string.
@@ -54,7 +54,7 @@ namespace xrpl {
         std::optional<SecretKey>
         parseBase58(TokenType type, ustring_view s);
 
-    std::string toBase58(TokenType type, SecretKey const& sk)
+    ustring toBase58(TokenType type, SecretKey const& sk)
     {
         return encodeBase58Token(type, sk.data());
     }
@@ -89,9 +89,9 @@ namespace xrpl {
         is hashed.
     */
     /** @{ */
-    std::string signDigest(PublicKey const& pk, SecretKey const& sk, uint256 const& digest);
+    ustring signDigest(PublicKey const& pk, SecretKey const& sk, uint256 const& digest);
 
-    std::string signDigest(KeyType type, SecretKey const& sk, uint256 const& digest)
+    ustring signDigest(KeyType type, SecretKey const& sk, uint256 const& digest)
     {
         return signDigest(derivePublicKey(type, sk), sk, digest);
     }
@@ -102,9 +102,9 @@ namespace xrpl {
         SHA512-Half, and the resulting digest is signed.
     */
     /** @{ */
-    std::string sign(PublicKey const& pk, SecretKey const& sk, ustring_view message);
+    ustring sign(PublicKey const& pk, SecretKey const& sk, ustring_view message);
 
-    std::string sign(KeyType type, SecretKey const& sk, ustring_view message)
+    ustring sign(KeyType type, SecretKey const& sk, ustring_view message)
     {
         return sign(derivePublicKey(type, sk), sk, message);
     }

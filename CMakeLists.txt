@@ -49,6 +49,7 @@ include(CTest)       # creates a BUILD_TESTING option that selects whether to en
 find_package(fmt)
 find_package(Boost)
 find_package(doctest REQUIRED)
+find_package(secp256k1)
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
@@ -76,8 +77,8 @@ install(TARGETS libxrpl attestation_server
   PUBLIC_HEADER DESTINATION include
 )
 
-install(FILES ${CMAKE_SOURCE_DIR}/lib/lib1.h 
-        DESTINATION include/lib1)
+install(FILES ${CMAKE_SOURCE_DIR}/libxrpl/lib1.h 
+        DESTINATION include/libxrpl)
 
 install(FILES ${CMAKE_SOURCE_DIR}/LICENSE
         DESTINATION .)

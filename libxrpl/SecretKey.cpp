@@ -1,9 +1,40 @@
 #include <SecretKey.h>
 #include <cstring>
 
+#include <secp256k1.h>
 #include "StrHex.h"
 #include "Digest.h"
+#include "rngfill.h"
 
+
+//---------------------------------------------------------------------------------
+namespace xrpl {
+
+template <class = void>
+secp256k1_context const*
+secp256k1Context()
+{
+    struct holder
+    {
+        secp256k1_context* impl;
+        holder()
+            : impl(secp256k1_context_create(
+                  SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN))
+        {
+        }
+
+        ~holder()
+        {
+            secp256k1_context_destroy(impl);
+        }
+    };
+    static holder const h;
+    return h.impl;
+}
+
+}
+
+//---------------------------------------------------------------------------------
 
 namespace xrpl {
 
@@ -27,7 +58,7 @@ SecretKey::SecretKey(ustring_view sv)
 std::string
 SecretKey::to_string() const
 {
-    return strHex(this->data());
+    return strHex(this->view());
 }
 
 namespace detail {
@@ -54,7 +85,7 @@ deriveDeterministicRootKey(Seed const& seed)
     //      |      seed      | seq|
 
     std::array<std::uint8_t, 20> buf;
-    std::copy(seed.data().begin(), seed.data().end(), buf.begin());
+    std::copy(seed.view().begin(), seed.view().end(), buf.begin());
 
     // The odds that this loop executes more than once are neglible
     // but *just* in case someone managed to generate a key that required
@@ -168,10 +199,10 @@ public:
         auto gsk = [this, tweak = calculateTweak(ordinal)]() {
             auto rpk = root_;
 
-            if (secp256k1_ec_privkey_tweak_add(
+            if (secp256k1_ec_seckey_tweak_add(
                     secp256k1Context(), rpk.data(), tweak.data()) == 1)
             {
-                SecretKey sk{Slice{rpk.data(), rpk.size()}};
+                SecretKey sk{rpk.view()};
                 secure_erase(rpk.data(), rpk.size());
                 return sk;
             }
@@ -185,10 +216,10 @@ public:
 
 }  // namespace detail
 
-Buffer
+ustring
 signDigest(PublicKey const& pk, SecretKey const& sk, uint256 const& digest)
 {
-    if (publicKeyType(pk.slice()) != KeyType::secp256k1)
+    if (publicKeyType(pk) != KeyType::secp256k1)
         LogicError("sign: secp256k1 required for digest signing");
 
     BOOST_ASSERT(sk.size() == 32);
@@ -208,19 +239,32 @@ signDigest(PublicKey const& pk, SecretKey const& sk, uint256 const& digest)
             secp256k1Context(), sig, &len, &sig_imp) != 1)
         LogicError("sign: secp256k1_ecdsa_signature_serialize_der failed");
 
-    return Buffer{sig, len};
+    return ustring{sig, len};
 }
 
-Buffer
-sign(PublicKey const& pk, SecretKey const& sk, Slice const& m)
+typedef unsigned char ed25519_signature[64];
+typedef unsigned char ed25519_public_key[32];
+typedef unsigned char ed25519_secret_key[32];
+extern "C" {
+typedef unsigned char curved25519_key[32];
+
+void ed25519_publickey(const ed25519_secret_key sk, ed25519_public_key pk);
+int ed25519_sign_open(const unsigned char *m, size_t mlen, const ed25519_public_key pk, const ed25519_signature RS);
+void ed25519_sign(const unsigned char *m, size_t mlen, const ed25519_secret_key sk, const ed25519_public_key pk, ed25519_signature RS);
+int ed25519_sign_open_batch(const unsigned char **m, size_t *mlen, const unsigned char **pk, const unsigned char **RS, size_t num, int *valid);
+void ed25519_randombytes_unsafe(void *out, size_t count);
+}
+
+ustring
+sign(PublicKey const& pk, SecretKey const& sk, ustring_view m)
 {
-    auto const type = publicKeyType(pk.slice());
+    auto const type = publicKeyType(pk);
     if (!type)
         LogicError("sign: invalid type");
     switch (*type)
     {
         case KeyType::ed25519: {
-            Buffer b(64);
+            ustring b(64, '\0');
             ed25519_sign(
                 m.data(), m.size(), sk.data(), pk.data() + 1, b.data());
             return b;
@@ -247,13 +291,14 @@ sign(PublicKey const& pk, SecretKey const& sk, Slice const& m)
                 LogicError(
                     "sign: secp256k1_ecdsa_signature_serialize_der failed");
 
-            return Buffer{sig, len};
+            return ustring{sig, len};
         }
         default:
             LogicError("sign: invalid type");
     }
 }
 
+#if 0
 SecretKey
 randomSecretKey()
 {
@@ -263,14 +308,15 @@ randomSecretKey()
     secure_erase(buf, sizeof(buf));
     return sk;
 }
+#endif
 
 SecretKey
 generateSecretKey(KeyType type, Seed const& seed)
 {
     if (type == KeyType::ed25519)
     {
-        auto key = sha512Half_s(Slice(seed.data(), seed.size()));
-        SecretKey sk{Slice{key.data(), key.size()}};
+        auto key = sha512Half_s(seed.view());
+        SecretKey sk{key.view()};
         secure_erase(key.data(), key.size());
         return sk;
     }
@@ -278,7 +324,7 @@ generateSecretKey(KeyType type, Seed const& seed)
     if (type == KeyType::secp256k1)
     {
         auto key = detail::deriveDeterministicRootKey(seed);
-        SecretKey sk{Slice{key.data(), key.size()}};
+        SecretKey sk{key.view()};
         secure_erase(key.data(), key.size());
         return sk;
     }
@@ -311,13 +357,13 @@ derivePublicKey(KeyType type, SecretKey const& sk)
                 LogicError(
                     "derivePublicKey: secp256k1_ec_pubkey_serialize failed");
 
-            return PublicKey{Slice{pubkey, len}};
+            return PublicKey{ustring_view{pubkey, len}};
         }
         case KeyType::ed25519: {
             unsigned char buf[33];
             buf[0] = 0xED;
             ed25519_publickey(sk.data(), &buf[1]);
-            return PublicKey(Slice{buf, sizeof(buf)});
+            return PublicKey(ustring_view{buf, sizeof(buf)});
         }
         default:
             LogicError("derivePublicKey: bad key type");
@@ -350,14 +396,14 @@ randomKeyPair(KeyType type)
 
 template <>
 std::optional<SecretKey>
-parseBase58(TokenType type, std::string const& s)
+parseBase58(TokenType type, ustring_view s)
 {
     auto const result = decodeBase58Token(s, type);
     if (result.empty())
         return std::nullopt;
     if (result.size() != 32)
         return std::nullopt;
-    return SecretKey(makeSlice(result));
+    return SecretKey(ustring_view(result));
 }    
         
 } // namespace xrpl

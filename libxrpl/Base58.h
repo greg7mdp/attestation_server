@@ -26,10 +26,10 @@ namespace xrpl {
     // Encode data in Base58Check format using XRPL alphabet
     //  For details on the format see
     //  https://xrpl.org/base58-encodings.html#base58-encodings
-    std::string encodeBase58Token(TokenType type, ustring_view sv);
+    ustring encodeBase58Token(TokenType type, ustring_view sv);
 
     // Decode a token of given type encoded using Base58Check and the XRPL alphabet
-    std::string decodeBase58Token(ustring_view sv, TokenType type);
+    ustring decodeBase58Token(ustring_view sv, TokenType type);
     
 } // namespace xrpl
 

@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <array>
 
+#include "hash_append.h"
+
 namespace xrpl {
 
 /** Message digest functions used in the codebase
@@ -189,7 +191,7 @@ using sha512_half_hasher = detail::basic_sha512_half_hasher<false>;
 using sha512_half_hasher_s = detail::basic_sha512_half_hasher<true>;
 
 //------------------------------------------------------------------------------
-
+#if 1
 /** Returns the SHA512-Half of a series of objects. */
 template <class... Args>
 sha512_half_hasher::result_type
@@ -216,7 +218,7 @@ sha512Half_s(Args const&... args)
     hash_append(h, args...);
     return static_cast<typename sha512_half_hasher_s::result_type>(h);
 }
-
+#endif
 
 }  // namespace xrpl
 

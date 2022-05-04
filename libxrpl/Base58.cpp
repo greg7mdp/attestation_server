@@ -70,7 +70,7 @@ namespace detail {
  * Distributed under the MIT software license, see the accompanying
  * file COPYING or http://www.opensource.org/licenses/mit-license.php.
  */
-static std::string
+static ustring
 encodeBase58(void const* message,
              std::size_t size,
              void* temp,
@@ -112,7 +112,7 @@ encodeBase58(void const* message,
         ++iter;
 
     // Translate the result into a string.
-    std::string str;
+    ustring str;
     str.reserve(zeroes + (b58end - iter));
     str.assign(zeroes, alphabetForward[0]);
     while (iter != b58end)
@@ -120,7 +120,7 @@ encodeBase58(void const* message,
     return str;
 }
 
-static std::string
+static ustring
 decodeBase58(ustring_view sv)
 {
     auto psz = sv.data();
@@ -159,7 +159,7 @@ decodeBase58(ustring_view sv)
     // Skip leading zeroes in b256.
     auto iter = std::find_if(
         b256.begin(), b256.end(), [](unsigned char c) { return c != 0; });
-    std::string result;
+    ustring result;
     result.reserve(zeroes + (b256.end() - iter));
     result.assign(zeroes, 0x00);
     while (iter != b256.end())
@@ -169,7 +169,7 @@ decodeBase58(ustring_view sv)
 
 }  // namespace detail
 
-std::string
+ustring
 encodeBase58Token(TokenType type,  ustring_view sv)
 {
     std::size_t size = sv.size();
@@ -195,10 +195,10 @@ encodeBase58Token(TokenType type,  ustring_view sv)
         buf.data(), expanded, buf.data() + expanded, bufsize - expanded);
 }
 
-std::string
+ustring
 decodeBase58Token(ustring_view sv, TokenType type)
 {
-    std::string const ret = detail::decodeBase58(sv);
+    ustring const ret = detail::decodeBase58(sv);
 
     // Reject zero length tokens
     if (ret.size() < 6)

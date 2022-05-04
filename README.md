@@ -42,6 +42,15 @@ sudo apt install -y g++-11
 g++-11 --version
 ```
 
+#### build additional packages
+
+```
+sudo apt-get install libtool
+cd conan_pkg/secp256k1
+conan create . demo/testing
+```
+
+
 #### and then build the project
 
 
