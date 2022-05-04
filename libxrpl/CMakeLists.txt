@@ -5,7 +5,7 @@ set(TARGET_NAME libxrpl)
 set(TARGET_INCLUDE_FOLDER ${CMAKE_CURRENT_SOURCE_DIR})
 set(TARGET_SOURCES Base58.cpp Common.cpp Digest.cpp PublicKey.cpp SecretKey.cpp Seed.cpp ed25519.c)
 
-# temporary adding stub for ed25519 
+# temporary adding stub for ed25519 with ed25519.c file above
 set_source_files_properties(ed25519.c PROPERTIES COMPILE_FLAGS -Wno-unused-parameter)
 
 #####################################
@@ -15,7 +15,7 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${TARGET_SOURCES})
 
 #####################################
 # Define Target according to options
-#####################################
+##################################### 
 if(BUILD_SHARED_LIBS)
   add_library(${TARGET_NAME} SHARED ${TARGET_SOURCES})
 else()

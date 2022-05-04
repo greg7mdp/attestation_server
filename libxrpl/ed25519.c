@@ -17,3 +17,4 @@ extern void ed25519_sign(const unsigned char *m, size_t mlen, const ed25519_secr
     assert(0);
     abort();
 }
+ 
