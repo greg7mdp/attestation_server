@@ -1,0 +1,6 @@
+[submodule "secp256k1"]
+	path = third_party/secp256k1
+	url = https://github.com/bitcoin-core/secp256k1.git
+[submodule "ed25519-donna"]
+	path = third_party/ed25519-donna
+	url = https://github.com/floodyberry/ed25519-donna.git        y
