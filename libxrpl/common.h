@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cstdint>
 #include <string>
+#include <cstring>
 #include <string_view>
 #include <array>
 #include <vector>
@@ -28,7 +29,12 @@ namespace xrpl {
         static constexpr std::size_t num_words = num_bits / sizeof(std::uint32_t);
         static constexpr std::size_t num_bytes = num_bits / 8;
 
-#if 1
+        using value_type = std::uint8_t;
+        using pointer = value_type*;
+        using reference = value_type&;
+        using const_pointer = value_type const*;
+        using const_reference = value_type const&;
+
         ustring_view view() const
         {
             return { reinterpret_cast<std::uint8_t const *>(data_.data()), size() };
@@ -48,24 +54,15 @@ namespace xrpl {
         {
             return num_bytes;
         }
-#else
-        using value_type = unsigned char;
-        using pointer = value_type*;
-        using reference = value_type&;
-        using const_pointer = value_type const*;
-        using const_reference = value_type const&;
         
-        pointer data()
+        static base_uint
+        fromVoid(void const* data)
         {
-            return reinterpret_cast<pointer>(data_.data());
+            base_uint res;
+            memcpy(res.data_.data(), data, num_bytes);
+            return res;
         }
-        
-        const_pointer data() const
-        {
-            return reinterpret_cast<const_pointer>(data_.data());
-        }
-#endif
-        
+
     private:
         static_assert((num_bits % 32) == 0,
                       "The length of a base_uint in bits must be a multiple of 32.");

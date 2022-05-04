@@ -32,6 +32,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <string_view>
 #include <system_error>
 #include <tuple>
 #include <type_traits>
@@ -286,6 +287,18 @@ hash_append(
     Hasher& h,
     std::basic_string<CharT, Traits, Alloc> const& s) noexcept;
 
+template <class Hasher, class CharT, class Traits>
+std::enable_if_t<!is_contiguously_hashable<CharT, Hasher>::value>
+hash_append(
+    Hasher& h,
+    std::basic_string_view<CharT, Traits> const& s) noexcept;
+
+template <class Hasher, class CharT, class Traits>
+std::enable_if_t<is_contiguously_hashable<CharT, Hasher>::value>
+hash_append(
+    Hasher& h,
+    std::basic_string_view<CharT, Traits> const& s) noexcept;
+
 template <class Hasher, class T, class U>
 std::enable_if_t<!is_contiguously_hashable<std::pair<T, U>, Hasher>::value>
 hash_append(Hasher& h, std::pair<T, U> const& p) noexcept;
@@ -356,6 +369,29 @@ inline std::enable_if_t<is_contiguously_hashable<CharT, Hasher>::value>
 hash_append(
     Hasher& h,
     std::basic_string<CharT, Traits, Alloc> const& s) noexcept
+{
+    h(s.data(), s.size() * sizeof(CharT));
+    hash_append(h, s.size());
+}
+
+// basic_string_view
+
+template <class Hasher, class CharT, class Traits>
+inline std::enable_if_t<!is_contiguously_hashable<CharT, Hasher>::value>
+hash_append(
+    Hasher& h,
+    std::basic_string_view<CharT, Traits> const& s) noexcept
+{
+    for (auto c : s)
+        hash_append(h, c);
+    hash_append(h, s.size());
+}
+
+template <class Hasher, class CharT, class Traits>
+inline std::enable_if_t<is_contiguously_hashable<CharT, Hasher>::value>
+hash_append(
+    Hasher& h,
+    std::basic_string_view<CharT, Traits> const& s) noexcept
 {
     h(s.data(), s.size() * sizeof(CharT));
     hash_append(h, s.size());
