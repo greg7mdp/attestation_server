@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.16.0 FATAL_ERROR)
 cmake_policy(SET CMP0063 NEW) # Enables the Visibility Property on all target types
 cmake_policy(SET CMP0091 NEW) # Enables the MSVC_RUNTIME_LIBRARY property on targets
 
-project(attestation_server LANGUAGES CXX DESCRIPTION "Sidechain Attestation Server")
+project(attestation_server LANGUAGES CXX C DESCRIPTION "Sidechain Attestation Server")
 
 set(CMAKE_PROJECT_VERSION_MAJOR 1)
 set(CMAKE_PROJECT_VERSION_MINOR 0)

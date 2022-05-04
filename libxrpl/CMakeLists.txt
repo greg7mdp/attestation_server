@@ -3,7 +3,8 @@
 #####################################
 set(TARGET_NAME libxrpl)
 set(TARGET_INCLUDE_FOLDER ${CMAKE_CURRENT_SOURCE_DIR})
-set(TARGET_SOURCES Base58.cpp Common.cpp Digest.cpp PublicKey.cpp SecretKey.cpp Seed.cpp)
+set(TARGET_SOURCES Base58.cpp Common.cpp Digest.cpp PublicKey.cpp SecretKey.cpp Seed.cpp ed25519.c)
+set_source_files_properties(foo.cpp PROPERTIES COMPILE_FLAGS -Wno-unused-parameter)
 
 #####################################
 # Support IDE Visualization

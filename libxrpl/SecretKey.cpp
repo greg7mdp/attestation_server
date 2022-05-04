@@ -249,8 +249,8 @@ extern "C" {
 typedef unsigned char curved25519_key[32];
 
 void ed25519_publickey(const ed25519_secret_key sk, ed25519_public_key pk);
-int ed25519_sign_open(const unsigned char *m, size_t mlen, const ed25519_public_key pk, const ed25519_signature RS);
 void ed25519_sign(const unsigned char *m, size_t mlen, const ed25519_secret_key sk, const ed25519_public_key pk, ed25519_signature RS);
+int ed25519_sign_open(const unsigned char *m, size_t mlen, const ed25519_public_key pk, const ed25519_signature RS);
 int ed25519_sign_open_batch(const unsigned char **m, size_t *mlen, const unsigned char **pk, const unsigned char **RS, size_t num, int *valid);
 void ed25519_randombytes_unsafe(void *out, size_t count);
 }
@@ -304,7 +304,7 @@ randomSecretKey()
 {
     std::uint8_t buf[32];
     beast::rngfill(buf, sizeof(buf), crypto_prng());
-    SecretKey sk(Slice{buf, sizeof(buf)});
+    SecretKey sk{ustring_view(buf)};
     secure_erase(buf, sizeof(buf));
     return sk;
 }
@@ -387,13 +387,15 @@ generateKeyPair(KeyType type, Seed const& seed)
     }
 }
 
+#if 0
 std::pair<PublicKey, SecretKey>
 randomKeyPair(KeyType type)
 {
     auto const sk = randomSecretKey();
     return {derivePublicKey(type, sk), sk};
 }
-
+#endif
+    
 template <>
 std::optional<SecretKey>
 parseBase58(TokenType type, ustring_view s)
