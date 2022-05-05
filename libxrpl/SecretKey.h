@@ -42,7 +42,7 @@ namespace xrpl {
         
     };
 
-    bool operator==(SecretKey const& lhs, SecretKey const& rhs)
+    inline bool operator==(SecretKey const& lhs, SecretKey const& rhs)
         {
             return lhs.data() == rhs.data();
         }
@@ -54,7 +54,7 @@ namespace xrpl {
         std::optional<SecretKey>
         parseBase58(TokenType type, ustring_view s);
 
-    ustring toBase58(TokenType type, SecretKey const& sk)
+    inline ustring toBase58(TokenType type, SecretKey const& sk)
     {
         return encodeBase58Token(type, sk.data());
     }
@@ -91,7 +91,7 @@ namespace xrpl {
     /** @{ */
     ustring signDigest(PublicKey const& pk, SecretKey const& sk, uint256 const& digest);
 
-    ustring signDigest(KeyType type, SecretKey const& sk, uint256 const& digest)
+    inline ustring signDigest(KeyType type, SecretKey const& sk, uint256 const& digest)
     {
         return signDigest(derivePublicKey(type, sk), sk, digest);
     }
@@ -104,7 +104,7 @@ namespace xrpl {
     /** @{ */
     ustring sign(PublicKey const& pk, SecretKey const& sk, ustring_view message);
 
-    ustring sign(KeyType type, SecretKey const& sk, ustring_view message)
+    inline ustring sign(KeyType type, SecretKey const& sk, ustring_view message)
     {
         return sign(derivePublicKey(type, sk), sk, message);
     }

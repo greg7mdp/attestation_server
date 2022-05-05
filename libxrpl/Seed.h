@@ -21,7 +21,7 @@ namespace xrpl {
 
         /** Construct a seed */
         /** @{ */
-        explicit Seed(ustring_view slice);
+        explicit Seed(ustring_view sv);
         explicit Seed(uint128 const& seed);
         /** @} */
 
