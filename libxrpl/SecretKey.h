@@ -38,6 +38,12 @@ namespace xrpl {
         {
             return sizeof(buf_);
         }
+
+        friend bool operator==(SecretKey const& lhs, SecretKey const& rhs)
+        {
+            return lhs.size() == rhs.size() &&
+            std::memcmp(lhs.data(), rhs.data(), rhs.size()) == 0;
+        }
         
         /** Convert the secret key to a hexadecimal string.
             @note The operator<< function is deliberately omitted
@@ -46,11 +52,6 @@ namespace xrpl {
         std::string to_string() const;
         
     };
-
-    inline bool operator==(SecretKey const& lhs, SecretKey const& rhs)
-        {
-            return lhs.data() == rhs.data();
-        }
 
     //------------------------------------------------------------------------------
 
@@ -61,7 +62,7 @@ namespace xrpl {
 
     inline ustring toBase58(TokenType type, SecretKey const& sk)
     {
-        return encodeBase58Token(type, sk.data());
+        return encodeBase58Token(type, { sk.data(), sk.size() });
     }
 
     /** Create a secret key using secure random numbers. */

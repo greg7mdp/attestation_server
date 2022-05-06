@@ -80,8 +80,8 @@ namespace xrpl {
     class  base_uint
     {
     public:
-        static constexpr std::size_t num_words = num_bits / sizeof(std::uint32_t);
         static constexpr std::size_t num_bytes = num_bits / 8;
+        static constexpr std::size_t num_words = num_bytes / sizeof(std::uint32_t);
 
         using value_type = std::uint8_t;
         using pointer = value_type*;

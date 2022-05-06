@@ -205,11 +205,11 @@ decodeBase58Token(ustring_view sv, TokenType type)
         return {};
 
     // The type must match.
-    if (type != safe_cast<TokenType>(static_cast<std::uint8_t>(ret[0])))
+    if (type != safe_cast<TokenType>(ret[0]))
         return {};
 
     // And the checksum must as well.
-    std::array<char, 4> guard;
+    std::array<std::uint8_t, 4> guard;
     checksum(guard.data(), ret.data(), ret.size() - guard.size());
     if (!std::equal(guard.rbegin(), guard.rend(), ret.rbegin()))
         return {};
