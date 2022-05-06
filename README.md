@@ -28,7 +28,20 @@ Attestation Server for XRPL sidechains
 
 ## How to build from command line
 
-The project can be built using the following commands:
+### First get the source code:
+
+```
+git clone --recurse-submodules https://github.com/greg7mdp/attestation_server.git
+cd https://github.com/greg7mdp/attestation_server.git
+```
+
+or to only update the submodules:
+
+```
+git submodule update --init --recursive
+```
+
+Then the project can be built using the following commands:
 
 ### linux
 

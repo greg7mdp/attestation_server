@@ -3,7 +3,7 @@ openssl/1.1.1l
 doctest/2.4.6
 boost/1.78.0
 fmt/8.1.1
-secp256k1/1.0@demo/stable
+#secp256k1/1.0@demo/stable
 
 [generators]
 CMakeDeps

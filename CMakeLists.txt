@@ -34,6 +34,9 @@ set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
 set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR} ${CMAKE_MODULE_PATH})
 set(CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR} ${CMAKE_PREFIX_PATH})
 
+# Specify where all the binaries go
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
 #####################################
 # Define Options
 #####################################
@@ -49,7 +52,7 @@ include(CTest)       # creates a BUILD_TESTING option that selects whether to en
 find_package(fmt)
 find_package(Boost)
 find_package(doctest REQUIRED)
-find_package(secp256k1)
+#find_package(secp256k1)
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
@@ -60,6 +63,56 @@ include(${CMAKE_SOURCE_DIR}/cmake/compiler_options.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/cpack.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/cppcheck.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/dependencies.cmake)
+
+#####################################
+# GMP
+#####################################
+find_path(GMP_INCLUDE_DIR NAMES gmp.h)
+if(MSVC)
+  find_library(GMP_LIBRARY mpir)
+else()
+  find_library(GMP_LIBRARY gmp)
+endif()
+if(GMP_LIBRARY MATCHES ${CMAKE_SHARED_LIBRARY_SUFFIX})
+  set(gmp_library_type SHARED)
+else()
+  set(gmp_library_type STATIC)
+endif()
+message(STATUS "GMP: ${GMP_LIBRARY}, ${GMP_INCLUDE_DIR}")
+add_library(gmp ${gmp_library_type} IMPORTED)
+set_target_properties(
+  gmp PROPERTIES
+  IMPORTED_LOCATION ${GMP_LIBRARY}
+  INTERFACE_INCLUDE_DIRECTORIES ${GMP_INCLUDE_DIR}
+)
+
+#####################################
+# secp256k1
+#####################################
+add_library(secp256k1 STATIC third_party/secp256k1/src/secp256k1.c
+                      third_party/secp256k1/src/precomputed_ecmult.c
+                      third_party/secp256k1/src/precomputed_ecmult_gen.c)
+
+if(MSVC)
+
+  target_link_libraries(secp256k1 PRIVATE gmp)
+  target_compile_definitions(secp256k1 PUBLIC USE_NUM_GMP USE_FIELD_INV_NUM USE_SCALAR_INV_NUM)
+  target_compile_definitions(secp256k1 PUBLIC USE_FIELD_10X26 USE_SCALAR_8X32)
+
+  target_compile_options(secp256k1 PRIVATE /w) # Not much we can do about warnings
+
+else()
+
+  target_compile_definitions(secp256k1 PUBLIC USE_NUM_NONE USE_FIELD_INV_BUILTIN USE_SCALAR_INV_BUILTIN)
+  target_compile_definitions(secp256k1 PUBLIC USE_FIELD_5X52 USE_SCALAR_4X64 HAVE___INT128)
+
+  target_compile_options(secp256k1 PRIVATE -fPIC)
+
+endif()
+
+target_compile_definitions(secp256k1 PUBLIC ECMULT_WINDOW_SIZE=15 ECMULT_GEN_PREC_BITS=4 USE_ENDOMORPHISM)
+target_compile_definitions(secp256k1 PUBLIC ENABLE_MODULE_RECOVERY)
+target_include_directories(secp256k1 PRIVATE secp256k1 INTERFACE third_party/secp256k1/include)
 
 #####################################
 # Define Targets

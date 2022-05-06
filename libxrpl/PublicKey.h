@@ -15,7 +15,7 @@ namespace xrpl {
     std::optional<KeyType>
         publicKeyType(ustring_view sv);
 
-    class PublicKey
+    class LIBXRPL_EXPORT PublicKey
     {
     protected:
         std::size_t size_ = 0;

@@ -9,6 +9,7 @@
 #include <array>
 #include <vector>
 #include <optional>
+#include <algorithm>
 #ifndef _MSC_VER
     #include <cxxabi.h>
 #endif
@@ -76,7 +77,7 @@ namespace xrpl {
     
     // ----------------------------- uint256 -------------------------------
     template <std::size_t num_bits, class Tag = void>
-    class base_uint
+    class  base_uint
     {
     public:
         static constexpr std::size_t num_words = num_bits / sizeof(std::uint32_t);

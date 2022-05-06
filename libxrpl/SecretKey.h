@@ -8,7 +8,7 @@
 
 namespace xrpl {
 
-    class SecretKey
+    class LIBXRPL_EXPORT SecretKey
     {
     private:
         std::uint8_t buf_[32];
@@ -34,6 +34,11 @@ namespace xrpl {
             return  &buf_[0];
         }
 
+        std::size_t size() const
+        {
+            return sizeof(buf_);
+        }
+        
         /** Convert the secret key to a hexadecimal string.
             @note The operator<< function is deliberately omitted
             to avoid accidental exposure of secret key material.

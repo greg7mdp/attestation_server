@@ -674,7 +674,7 @@ public:
         for (auto const& test : secp256k1TestVectors)
         {
             auto const id = parseBase58<AccountID>(to_ustring_view(test.addr));
-//            REQUIRE(id);
+            REQUIRE(id);
 
             auto kp =
                 generateKeyPair(KeyType::secp256k1, Seed{to_ustring_view(test.seed)});

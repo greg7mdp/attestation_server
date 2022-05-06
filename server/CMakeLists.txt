@@ -43,4 +43,4 @@ target_include_directories(${TARGET_NAME}
 
 # link against hellolib
 target_link_libraries(${TARGET_NAME} PUBLIC libxrpl)
-target_link_libraries(${TARGET_NAME} PRIVATE doctest::doctest boost::boost fmt::fmt)
+target_link_libraries(${TARGET_NAME} PUBLIC doctest::doctest boost::boost fmt::fmt)
