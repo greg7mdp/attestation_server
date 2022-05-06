@@ -57,6 +57,10 @@ g++-11 --version
 
 #### build additional packages
 
+
+*** not needed anymore, secp256k1 is added as a submodule ****
+
+
 ```
 sudo apt-get install libtool
 cd conan_pkg/secp256k1
@@ -79,7 +83,7 @@ cmake --build .
 ### macos
 
 install conan and cmake if necessary using brew:
-
+:q
 ```
 brew install conan
 brew install cmake
