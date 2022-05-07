@@ -120,7 +120,7 @@ verify(
             // so when verifying the signature, we need to
             // first strip that prefix.
             return ed25519_sign_open(
-                       m.data(), m.size(), publicKey.data() + 1, sig.data()) ==
+                m.data(), m.size(), publicKey.data() + 1, sig.data()) ==
                 0;
         }
 #endif

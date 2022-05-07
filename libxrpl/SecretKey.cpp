@@ -74,7 +74,7 @@ deriveDeterministicRootKey(Seed const& seed)
 
         if (secp256k1_ec_seckey_verify(secp256k1Context(), ret.data()) == 1)
         {
-            secure_erase(buf.data(), buf.size());
+            secure_erase(buf);
             return ret;
         }
     }
@@ -133,7 +133,7 @@ private:
 
             if (secp256k1_ec_seckey_verify(secp256k1Context(), ret.data()) == 1)
             {
-                secure_erase(buf.data(), buf.size());
+                secure_erase(buf);
                 return ret;
             }
         }
@@ -163,8 +163,8 @@ public:
 
     ~Generator()
     {
-        secure_erase(root_.data(), root_.size());
-        secure_erase(generator_.data(), generator_.size());
+        secure_erase(root_);
+        secure_erase(generator_);
     }
 
     /** Generate the nth key pair. */
@@ -179,7 +179,7 @@ public:
                     secp256k1Context(), rpk.data(), tweak.data()) == 1)
             {
                 SecretKey sk{rpk.view()};
-                secure_erase(rpk.data(), rpk.size());
+                secure_erase(rpk);
                 return sk;
             }
 
@@ -247,7 +247,7 @@ sign(PublicKey const& pk, SecretKey const& sk, ustring_view m)
         }
         case KeyType::secp256k1: {
             sha512_half_hasher h;
-            h(m.data(), m.size());
+            h(m);
             auto const digest = sha512_half_hasher::result_type(h);
 
             secp256k1_ecdsa_signature sig_imp;
@@ -291,7 +291,7 @@ generateSecretKey(KeyType type, Seed const& seed)
     {
         auto key = sha512Half_s(seed.view());
         SecretKey sk{key.view()};
-        secure_erase(key.data(), key.size());
+        secure_erase(key);
         return sk;
     }
 
@@ -299,7 +299,7 @@ generateSecretKey(KeyType type, Seed const& seed)
     {
         auto key = detail::deriveDeterministicRootKey(seed);
         SecretKey sk{key.view()};
-        secure_erase(key.data(), key.size());
+        secure_erase(key);
         return sk;
     }
 

@@ -47,7 +47,7 @@ namespace xrpl {
         @note This will not attempt to determine the format of
         the string (e.g. hex or base58).
     */
-    Seed generateSeed(std::string const& passPhrase);
+    Seed generateSeed(std::string_view passPhrase);
 
     /** Parse a Base58 encoded string into a seed */
     template <>

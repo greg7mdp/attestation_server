@@ -26,6 +26,12 @@ void secure_erase(void* dest, std::size_t bytes)
     OPENSSL_cleanse(dest, bytes);
 }
 
+void secure_erase(ustring& sv)
+{
+    OPENSSL_cleanse(sv.data(), sv.size());
+}
+
+
 
 // ---------------- error ---------------------
 namespace detail {

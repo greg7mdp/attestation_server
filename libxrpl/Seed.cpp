@@ -10,7 +10,7 @@ namespace xrpl {
 
 Seed::~Seed()
 {
-    secure_erase(buf_.data(), buf_.size());
+    secure_erase(buf_);
 }
 
 Seed::Seed(ustring_view sv)
@@ -34,12 +34,12 @@ randomSeed()
     std::array<std::uint8_t, 16> buffer;
     beast::rngfill(buffer.data(), buffer.size(), crypto_prng());
     Seed seed(to_ustring_view(buffer));
-    secure_erase(buffer.data(), buffer.size());
+    secure_erase(buffer);
     return seed;
 }
 
 Seed
-generateSeed(std::string const& passPhrase)
+generateSeed(std::string_view passPhrase)
 {
     sha512_half_hasher_s h;
     h(passPhrase.data(), passPhrase.size());
@@ -79,7 +79,7 @@ parseGenericSeed(ustring_view str)
         uint128 seed;
 
         if (seed.parseHex(str))
-            return Seed{Slice(seed.data(), seed.size())};
+            return Seed{seed.view()};
     }
 
     if (auto seed = parseBase58<Seed>(str))

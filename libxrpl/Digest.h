@@ -37,6 +37,9 @@ public:
     void
     operator()(void const* data, std::size_t size) noexcept;
 
+    void
+    operator()(ustring_view sv) noexcept { (*this)(sv.data(), sv.size()); }
+
     explicit operator result_type() noexcept;
 
 private:
@@ -59,6 +62,9 @@ public:
     void
     operator()(void const* data, std::size_t size) noexcept;
 
+    void
+    operator()(ustring_view sv) noexcept { (*this)(sv.data(), sv.size()); }
+
     explicit operator result_type() noexcept;
 
 private:
@@ -80,6 +86,9 @@ public:
 
     void
     operator()(void const* data, std::size_t size) noexcept;
+
+    void
+    operator()(ustring_view sv) noexcept { (*this)(sv.data(), sv.size()); }
 
     explicit operator result_type() noexcept;
 
@@ -165,6 +174,9 @@ public:
     {
         h_(data, size);
     }
+
+    void
+    operator()(ustring_view sv) noexcept { (*this)(sv.data(), sv.size()); }
 
     explicit operator result_type() noexcept
     {

@@ -443,6 +443,21 @@ namespace xrpl {
     };
 
     void secure_erase(void* dest, std::size_t bytes);
+    void secure_erase(ustring& sv);
+
+    template <class T, std::size_t N>
+    std::enable_if_t<
+    std::is_same<T, char>::value || std::is_same<T, unsigned char>::value, void>
+    static inline secure_erase(std::array<T, N>& a)
+    {
+        secure_erase(a.data(), a.size());
+    }
+
+    template <std::size_t num_bits, class Tag>
+    void secure_erase(base_uint<num_bits, Tag> &a) {
+        secure_erase(a.data(), a.size());
+    }
+    
     
 } // namespace xrpl
 

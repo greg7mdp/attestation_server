@@ -62,7 +62,7 @@ namespace xrpl {
 
     inline ustring toBase58(TokenType type, SecretKey const& sk)
     {
-        return encodeBase58Token(type, { sk.data(), sk.size() });
+        return encodeBase58Token(type, sk.view());
     }
 
     /** Create a secret key using secure random numbers. */
