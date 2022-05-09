@@ -5,8 +5,7 @@
 DOCTEST_SYMBOL_IMPORT void from_dll();
 // ------- end of doctest stuff --------------
 
-#include <libxrpl/lib1.h>
-using namespace xrpl;
+//using namespace xrpl;
 
 int
 main(int argc, char** argv)

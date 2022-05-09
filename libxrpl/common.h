@@ -108,9 +108,8 @@ namespace xrpl {
         {
             return num_bytes;
         }
-        
-        static base_uint
-        fromVoid(void const* data)
+
+        static base_uint fromVoid(void const* data)
         {
             base_uint res;
             memcpy(res.data_.data(), data, num_bytes);
