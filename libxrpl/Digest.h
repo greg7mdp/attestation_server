@@ -137,6 +137,11 @@ public:
         h_(data, size);
     }
 
+    void operator()(ustring_view sv) noexcept
+    {
+        (*this)(sv.data(), sv.size());
+    }
+
     explicit operator result_type() noexcept
     {
         auto const d0 = (sha256_hasher::result_type)h_;

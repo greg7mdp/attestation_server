@@ -133,7 +133,7 @@ AccountID calcAccountID(PublicKey const& pk)
     static_assert(AccountID::num_bytes == sizeof(ripesha_hasher::result_type));
 
     ripesha_hasher rsh;
-    rsh(pk.data(), pk.size());
+    rsh(pk.view());
     return AccountID{static_cast<ripesha_hasher::result_type>(rsh)};
 }
 

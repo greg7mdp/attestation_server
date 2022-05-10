@@ -224,6 +224,27 @@ bool verify(PublicKey const& publicKey, ustring_view m, ustring_view sig, bool m
 }
 
 //  ----------------------------------------------------------
+NodeID calcNodeID(PublicKey const& pk)
+{
+    static_assert(NodeID::num_bytes == sizeof(ripesha_hasher::result_type));
+
+    ripesha_hasher h;
+    h(pk.view());
+    return NodeID{static_cast<ripesha_hasher::result_type>(h)};
+}
+
+#if 0
+AccountID calcAccountID(PublicKey const& pk)
+{
+    static_assert(AccountID::num_bytes == sizeof(ripesha_hasher::result_type));
+
+    ripesha_hasher rsh;
+    rsh(pk.view());
+    return AccountID{static_cast<ripesha_hasher::result_type>(rsh)};
+}
+#endif
+
+//  ----------------------------------------------------------
 std::optional<KeyType> publicKeyType(ustring_view sv)
 {
     if (sv.size() == 33)

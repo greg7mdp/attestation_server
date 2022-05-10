@@ -15,6 +15,8 @@
 #include <cxxabi.h>
 #endif
 
+#include "StrHex.h"
+
 #include <boost/endian/conversion.hpp>
 #include "libxrpl_export.h"
 
@@ -43,6 +45,16 @@ std::enable_if_t<
 static inline ustring_view to_ustring_view(char const* s)
 {
     return ustring_view(reinterpret_cast<std::uint8_t const*>(s), strlen(s));
+}
+
+static inline ustring_view to_ustring_view(std::string const& s)
+{
+    return ustring_view(reinterpret_cast<std::uint8_t const*>(s.data()), s.size());
+}
+
+static inline ustring to_ustring(char const* s)
+{
+    return ustring(reinterpret_cast<std::uint8_t const*>(s), strlen(s));
 }
 
 // ----------------------------- zero ---------------------------------------
@@ -240,6 +252,7 @@ public:
         data_[num_words - 1] = u[1];
         return *this;
     }
+
     [[nodiscard]] constexpr bool parseHex(ustring_view sv)
     {
         auto const result = parseFromStringView(sv);
@@ -250,6 +263,12 @@ public:
         return true;
     }
 };
+
+template <std::size_t Bits, class Tag>
+inline std::string to_string(base_uint<Bits, Tag> const& a)
+{
+    return strHex(a.view());
+}
 
 template <std::size_t Bits, class Tag>
 inline int compare(base_uint<Bits, Tag> const& a, base_uint<Bits, Tag> const& b)
