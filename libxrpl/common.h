@@ -10,6 +10,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include <functional>
 #ifndef _MSC_VER
 #include <cxxabi.h>
 #endif
@@ -434,5 +435,17 @@ void secure_erase(base_uint<num_bits, Tag>& a)
 }
 
 }  // namespace xrpl
+
+namespace std {
+    template<>
+    struct hash<xrpl::ustring> {
+        std::hash<std::string> str_hasher_;
+            
+        std::size_t operator()(xrpl::ustring const &s) {
+            return str_hasher_(*reinterpret_cast<std::string const *>(&s));
+        }
+    };
+}
+
 
 #endif  // LIBXRPL_COMMON_H_INCLUDED

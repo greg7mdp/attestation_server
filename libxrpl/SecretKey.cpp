@@ -382,7 +382,6 @@ public:
     {
         // TEST_CASE("secp256k1: canonicality");
 
-#ifdef LATER
         std::array<std::uint8_t, 32> const digestData{0x34, 0xC1, 0x90, 0x28, 0xC8, 0x0D, 0x21, 0xF3, 0xF4, 0x8C, 0x93,
                                                       0x54, 0x89, 0x5F, 0x8D, 0x5B, 0xF0, 0xD5, 0xEE, 0x7F, 0xF4, 0x57,
                                                       0x64, 0x7C, 0xF6, 0x55, 0xF5, 0x53, 0x0A, 0x30, 0x22, 0xA7};
@@ -413,20 +412,19 @@ public:
         SecretKey const sk{skData};
         {
             auto const canonicality = ecdsaCanonicality(to_ustring_view(sig));
-            REQUIRE(canonicality);
-            REQUIRE(*canonicality == ECDSACanonicality::fullyCanonical);
+            CHECK(canonicality);
+            CHECK(*canonicality == ECDSACanonicality::fullyCanonical);
         }
 
         {
             auto const canonicality = ecdsaCanonicality(to_ustring_view(non));
-            REQUIRE(canonicality);
-            REQUIRE(*canonicality != ECDSACanonicality::fullyCanonical);
+            CHECK(canonicality);
+            CHECK(*canonicality != ECDSACanonicality::fullyCanonical);
         }
-        REQUIRE(verifyDigest(pk, digest, to_ustring_view(sig), false));
-        REQUIRE(verifyDigest(pk, digest, to_ustring_view(sig), true));
-        REQUIRE(verifyDigest(pk, digest, to_ustring_view(non), false));
-        REQUIRE(!verifyDigest(pk, digest, to_ustring_view(non), true));
-#endif
+        CHECK(verifyDigest(pk, digest, to_ustring_view(sig), false));
+        CHECK(verifyDigest(pk, digest, to_ustring_view(sig), true));
+        CHECK(verifyDigest(pk, digest, to_ustring_view(non), false));
+        CHECK(!verifyDigest(pk, digest, to_ustring_view(non), true));
     }
 
     void testDigestSigning()
@@ -437,8 +435,8 @@ public:
         {
             auto const [pk, sk] = randomKeyPair(KeyType::secp256k1);
 
-            REQUIRE(pk == derivePublicKey(KeyType::secp256k1, sk));
-            REQUIRE(*publicKeyType(pk) == KeyType::secp256k1);
+            CHECK(pk == derivePublicKey(KeyType::secp256k1, sk));
+            CHECK(*publicKeyType(pk) == KeyType::secp256k1);
 
             for (std::size_t j = 0; j < 32; j++)
             {
@@ -447,21 +445,21 @@ public:
 
                 auto sig = signDigest(pk, sk, digest);
 
-                REQUIRE(sig.size() != 0);
-                REQUIRE(verifyDigest(pk, digest, sig, true));
+                CHECK(sig.size() != 0);
+                CHECK(verifyDigest(pk, digest, sig, true));
 
                 // Wrong digest:
-                REQUIRE(!verifyDigest(pk, ~digest, sig, true));
+                CHECK(!verifyDigest(pk, ~digest, sig, true));
 
                 // Slightly change the signature:
                 if (auto ptr = sig.data())
                     ptr[j % sig.size()]++;
 
                 // Wrong signature:
-                REQUIRE(!verifyDigest(pk, digest, sig, true));
+                CHECK(!verifyDigest(pk, digest, sig, true));
 
                 // Wrong digest and signature:
-                REQUIRE(!verifyDigest(pk, ~digest, sig, true));
+                CHECK(!verifyDigest(pk, ~digest, sig, true));
             }
         }
     }
@@ -474,8 +472,8 @@ public:
         {
             auto const [pk, sk] = randomKeyPair(type);
 
-            REQUIRE(pk == derivePublicKey(type, sk));
-            REQUIRE(*publicKeyType(pk) == type);
+            CHECK(pk == derivePublicKey(type, sk));
+            CHECK(*publicKeyType(pk) == type);
 
             for (std::size_t j = 0; j < 32; j++)
             {
@@ -484,9 +482,9 @@ public:
 
                 auto sig = sign(pk, sk, to_ustring_view(data));
 
-                REQUIRE(sig.size() != 0);
+                CHECK(sig.size() != 0);
                 bool ok = verify(pk, to_ustring_view(data), sig, true);
-                REQUIRE(ok);
+                CHECK(ok);
 
                 // Construct wrong data:
                 auto badData = data;
@@ -496,17 +494,17 @@ public:
                     std::min_element(badData.begin(), badData.end()), std::max_element(badData.begin(), badData.end()));
 
                 // Wrong data: should fail
-                REQUIRE(!verify(pk, to_ustring_view(badData), sig, true));
+                CHECK(!verify(pk, to_ustring_view(badData), sig, true));
 
                 // Slightly change the signature:
                 if (auto ptr = sig.data())
                     ptr[j % sig.size()]++;
 
                 // Wrong signature: should fail
-                REQUIRE(!verify(pk, to_ustring_view(data), sig, true));
+                CHECK(!verify(pk, to_ustring_view(data), sig, true));
 
                 // Wrong data and signature: should fail
-                REQUIRE(!verify(pk, to_ustring_view(badData), sig, true));
+                CHECK(!verify(pk, to_ustring_view(badData), sig, true));
             }
         }
     }
@@ -521,52 +519,51 @@ public:
 
             auto const sk2 = parseBase58<SecretKey>(
                 TokenType::NodePrivate, to_ustring_view("pnen77YEeUd4fFKG7iycBWcwKpTaeFRkW2WFostaATy1DSupwXe"));
-            REQUIRE(!!sk2);
+            CHECK(!!sk2);
 
             bool same_keys = sk1 == *sk2;
-            REQUIRE(same_keys);
+            CHECK(same_keys);
         }
 
-#ifdef LATER
+#ifdef LATER // ed25519 not supported yet
         {
             auto const sk1 = generateSecretKey(KeyType::ed25519, generateSeed("masterpassphrase"));
 
             auto const sk2 = parseBase58<SecretKey>(
                 TokenType::NodePrivate, to_ustring_view("paKv46LztLqK3GaKz1rG2nQGN6M4JLyRtxFBYFTw4wAVHtGys36"));
-            REQUIRE(sk2);
+            CHECK(sk2);
 
-            REQUIRE(sk1 == *sk2);
+            CHECK(sk1 == *sk2);
         }
 #endif
 
         // Try converting short, long and malformed data
-        REQUIRE(!parseBase58<SecretKey>(TokenType::NodePrivate, to_ustring_view("")));
-        REQUIRE(!parseBase58<SecretKey>(TokenType::NodePrivate, to_ustring_view(" ")));
-        REQUIRE(!parseBase58<SecretKey>(TokenType::NodePrivate, to_ustring_view("!35gty9mhju8nfjl")));
+        CHECK(!parseBase58<SecretKey>(TokenType::NodePrivate, to_ustring_view("")));
+        CHECK(!parseBase58<SecretKey>(TokenType::NodePrivate, to_ustring_view(" ")));
+        CHECK(!parseBase58<SecretKey>(TokenType::NodePrivate, to_ustring_view("!35gty9mhju8nfjl")));
 
         auto const good = toBase58(TokenType::NodePrivate, randomSecretKey());
-#ifdef LATER
+
         // Short (non-empty) strings
         {
             auto s = good;
 
             // Remove all characters from the string in random order:
-            std::hash<std::string> r;
+            std::hash<ustring> r;
 
             while (!s.empty())
             {
                 s.erase(r(s) % s.size(), 1);
-                REQUIRE(!parseBase58<SecretKey>(TokenType::NodePrivate, s));
+                CHECK(!parseBase58<SecretKey>(TokenType::NodePrivate, s));
             }
         }
-#endif
 
         // Long strings
         for (std::size_t i = 1; i != 16; i++)
         {
             auto s = good;
             s.resize(s.size() + i, s[i % s.size()]);
-            REQUIRE(!parseBase58<SecretKey>(TokenType::NodePrivate, s));
+            CHECK(!parseBase58<SecretKey>(TokenType::NodePrivate, s));
         }
 
         // Strings with invalid Base58 characters
@@ -576,7 +573,7 @@ public:
             {
                 auto s = good;
                 s[i % s.size()] = c;
-                REQUIRE(!parseBase58<SecretKey>(TokenType::NodePrivate, s));
+                CHECK(!parseBase58<SecretKey>(TokenType::NodePrivate, s));
             }
         }
 
@@ -587,7 +584,7 @@ public:
             for (auto c : std::string("ansrJqtv7"))
             {
                 s[0] = c;
-                REQUIRE(!parseBase58<SecretKey>(TokenType::NodePrivate, s));
+                CHECK(!parseBase58<SecretKey>(TokenType::NodePrivate, s));
             }
         }
 
@@ -600,25 +597,25 @@ public:
         for (std::size_t i = 0; i != keys.size(); ++i)
         {
             auto const si = toBase58(TokenType::NodePrivate, keys[i]);
-            REQUIRE(!si.empty());
+            CHECK(!si.empty());
 
             auto const ski = parseBase58<SecretKey>(TokenType::NodePrivate, si);
             bool check = ski && keys[i] == *ski;
-            REQUIRE(check);
+            CHECK(check);
 
             for (std::size_t j = i; j != keys.size(); ++j)
             {
-                REQUIRE((keys[i] == keys[j]) == (i == j));
+                CHECK((keys[i] == keys[j]) == (i == j));
 
                 auto const sj = toBase58(TokenType::NodePrivate, keys[j]);
 
-                REQUIRE((si == sj) == (i == j));
+                CHECK((si == sj) == (i == j));
 
                 auto const skj = parseBase58<SecretKey>(TokenType::NodePrivate, sj);
                 bool check1 = skj && keys[j] == *skj;
                 bool check2 = (*ski == *skj) == (i == j);
-                REQUIRE(check1);
-                REQUIRE(check2);
+                CHECK(check1);
+                CHECK(check2);
             }
         }
     }
@@ -630,13 +627,13 @@ public:
         for (auto const& test : secp256k1TestVectors)
         {
             auto const id = parseBase58<AccountID>(to_ustring_view(test.addr));
-            REQUIRE(id);
+            CHECK(id);
 
             auto kp = generateKeyPair(KeyType::secp256k1, Seed{to_ustring_view(test.seed)});
 
-            REQUIRE(kp.first == PublicKey{to_ustring_view(test.pubkey)});
-            REQUIRE(kp.second == SecretKey{to_ustring_view(test.seckey)});
-            REQUIRE(calcAccountID(kp.first) == *id);
+            CHECK(kp.first == PublicKey{to_ustring_view(test.pubkey)});
+            CHECK(kp.second == SecretKey{to_ustring_view(test.seckey)});
+            CHECK(calcAccountID(kp.first) == *id);
         }
     }
 
@@ -647,13 +644,13 @@ public:
         for (auto const& test : ed25519TestVectors)
         {
             auto const id = parseBase58<AccountID>(to_ustring_view(test.addr));
-            REQUIRE(id);
+            CHECK(id);
 
             auto kp = generateKeyPair(KeyType::ed25519, Seed{to_ustring_view(test.seed)});
 
-            REQUIRE(kp.first == PublicKey{to_ustring_view(test.pubkey)});
-            REQUIRE(kp.second == SecretKey{to_ustring_view(test.seckey)});
-            REQUIRE(calcAccountID(kp.first) == *id);
+            CHECK(kp.first == PublicKey{to_ustring_view(test.pubkey)});
+            CHECK(kp.second == SecretKey{to_ustring_view(test.seckey)});
+            CHECK(calcAccountID(kp.first) == *id);
         }
     }
 
