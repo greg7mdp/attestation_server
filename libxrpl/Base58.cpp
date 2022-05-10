@@ -1,6 +1,6 @@
 #include "Base58.h"
-#include "Digest.h"
 #include <boost/container/small_vector.hpp>
+#include "Digest.h"
 
 #include <cstring>
 #include <memory>
@@ -8,8 +8,7 @@
 
 namespace xrpl {
 
-static constexpr char const* alphabetForward =
-    "rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz";
+static constexpr char const* alphabetForward = "rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz";
 
 static constexpr std::array<int, 256> const alphabetReverse = []() {
     std::array<int, 256> map{};
@@ -21,26 +20,22 @@ static constexpr std::array<int, 256> const alphabetReverse = []() {
 }();
 
 template <class Hasher>
-static typename Hasher::result_type
-digest(void const* data, std::size_t size) noexcept
+static typename Hasher::result_type digest(void const* data, std::size_t size) noexcept
 {
     Hasher h;
     h(data, size);
     return static_cast<typename Hasher::result_type>(h);
 }
 
-template <class Hasher, class T, std::size_t N,
-          class = std::enable_if_t<sizeof(T) == 1>>
-static typename Hasher::result_type
-digest(std::array<T, N> const& v)
+template <class Hasher, class T, std::size_t N, class = std::enable_if_t<sizeof(T) == 1>>
+static typename Hasher::result_type digest(std::array<T, N> const& v)
 {
     return digest<Hasher>(v.data(), v.size());
 }
 
 // Computes a double digest (e.g. digest of the digest)
 template <class Hasher, class... Args>
-static typename Hasher::result_type
-digest2(Args const&... args)
+static typename Hasher::result_type digest2(Args const&... args)
 {
     return digest<Hasher>(digest<Hasher>(args...));
 }
@@ -54,8 +49,7 @@ digest2(Args const&... args)
 
     @note This checksum algorithm is part of the client API
 */
-static void
-checksum(void* out, void const* message, std::size_t size)
+static void checksum(void* out, void const* message, std::size_t size)
 {
     auto const h = digest2<sha256_hasher>(message, size);
     std::memcpy(out, h.data(), 4);
@@ -70,11 +64,7 @@ namespace detail {
  * Distributed under the MIT software license, see the accompanying
  * file COPYING or http://www.opensource.org/licenses/mit-license.php.
  */
-static ustring
-encodeBase58(void const* message,
-             std::size_t size,
-             void* temp,
-             std::size_t temp_size)
+static ustring encodeBase58(void const* message, std::size_t size, void* temp, std::size_t temp_size)
 {
     auto pbegin = reinterpret_cast<unsigned char const*>(message);
     auto const pend = pbegin + size;
@@ -120,8 +110,7 @@ encodeBase58(void const* message,
     return str;
 }
 
-static ustring
-decodeBase58(ustring_view sv)
+static ustring decodeBase58(ustring_view sv)
 {
     auto psz = sv.data();
     auto remain = sv.size();
@@ -157,8 +146,7 @@ decodeBase58(ustring_view sv)
         --remain;
     }
     // Skip leading zeroes in b256.
-    auto iter = std::find_if(
-        b256.begin(), b256.end(), [](unsigned char c) { return c != 0; });
+    auto iter = std::find_if(b256.begin(), b256.end(), [](unsigned char c) { return c != 0; });
     ustring result;
     result.reserve(zeroes + (b256.end() - iter));
     result.assign(zeroes, 0x00);
@@ -169,11 +157,10 @@ decodeBase58(ustring_view sv)
 
 }  // namespace detail
 
-ustring
-encodeBase58Token(TokenType type,  ustring_view sv)
+ustring encodeBase58Token(TokenType type, ustring_view sv)
 {
     std::size_t size = sv.size();
-    
+
     // expanded token includes type + 4 byte checksum
     auto const expanded = 1 + size + 4;
 
@@ -191,12 +178,10 @@ encodeBase58Token(TokenType type,  ustring_view sv)
         std::memcpy(buf.data() + 1, sv.data(), size);
     checksum(buf.data() + 1 + size, buf.data(), 1 + size);
 
-    return detail::encodeBase58(
-        buf.data(), expanded, buf.data() + expanded, bufsize - expanded);
+    return detail::encodeBase58(buf.data(), expanded, buf.data() + expanded, bufsize - expanded);
 }
 
-ustring
-decodeBase58Token(ustring_view sv, TokenType type)
+ustring decodeBase58Token(ustring_view sv, TokenType type)
 {
     ustring const ret = detail::decodeBase58(sv);
 
@@ -218,5 +203,4 @@ decodeBase58Token(ustring_view sv, TokenType type)
     return ret.substr(1, ret.size() - 1 - guard.size());
 }
 
-    
-} // namespace xrpl
+}  // namespace xrpl

@@ -9,8 +9,7 @@
 namespace beast {
 
 template <class Generator>
-void
-rngfill(void* buffer, std::size_t bytes, Generator& g)
+void rngfill(void* buffer, std::size_t bytes, Generator& g)
 {
     using result_type = typename Generator::result_type;
     while (bytes >= sizeof(result_type))
@@ -33,12 +32,8 @@ rngfill(void* buffer, std::size_t bytes, Generator& g)
 #endif
 }
 
-template <
-    class Generator,
-    std::size_t N,
-    class = std::enable_if_t<N % sizeof(typename Generator::result_type) == 0>>
-void
-rngfill(std::array<std::uint8_t, N>& a, Generator& g)
+template <class Generator, std::size_t N, class = std::enable_if_t<N % sizeof(typename Generator::result_type) == 0>>
+void rngfill(std::array<std::uint8_t, N>& a, Generator& g)
 {
     using result_type = typename Generator::result_type;
     auto i = N / sizeof(result_type);

@@ -1,8 +1,8 @@
 #ifndef LIBXRPL_DIGEST_H_INCLUDED
 #define LIBXRPL_DIGEST_H_INCLUDED
 
-#include <Common.h>
 #include <boost/endian/conversion.hpp>
+#include <Common.h>
 #include <algorithm>
 #include <array>
 
@@ -34,11 +34,12 @@ public:
 
     openssl_ripemd160_hasher();
 
-    void
-    operator()(void const* data, std::size_t size) noexcept;
+    void operator()(void const* data, std::size_t size) noexcept;
 
-    void
-    operator()(ustring_view sv) noexcept { (*this)(sv.data(), sv.size()); }
+    void operator()(ustring_view sv) noexcept
+    {
+        (*this)(sv.data(), sv.size());
+    }
 
     explicit operator result_type() noexcept;
 
@@ -59,11 +60,12 @@ public:
 
     openssl_sha512_hasher();
 
-    void
-    operator()(void const* data, std::size_t size) noexcept;
+    void operator()(void const* data, std::size_t size) noexcept;
 
-    void
-    operator()(ustring_view sv) noexcept { (*this)(sv.data(), sv.size()); }
+    void operator()(ustring_view sv) noexcept
+    {
+        (*this)(sv.data(), sv.size());
+    }
 
     explicit operator result_type() noexcept;
 
@@ -84,11 +86,12 @@ public:
 
     openssl_sha256_hasher();
 
-    void
-    operator()(void const* data, std::size_t size) noexcept;
+    void operator()(void const* data, std::size_t size) noexcept;
 
-    void
-    operator()(ustring_view sv) noexcept { (*this)(sv.data(), sv.size()); }
+    void operator()(ustring_view sv) noexcept
+    {
+        (*this)(sv.data(), sv.size());
+    }
 
     explicit operator result_type() noexcept;
 
@@ -99,8 +102,8 @@ private:
 //------------------------------------------------------------------------------
 
 using ripemd160_hasher = openssl_ripemd160_hasher;
-using sha256_hasher    = openssl_sha256_hasher;
-using sha512_hasher    = openssl_sha512_hasher;
+using sha256_hasher = openssl_sha256_hasher;
+using sha512_hasher = openssl_sha512_hasher;
 
 //------------------------------------------------------------------------------
 
@@ -129,8 +132,7 @@ public:
 
     using result_type = std::array<std::uint8_t, 20>;
 
-    void
-    operator()(void const* data, std::size_t size) noexcept
+    void operator()(void const* data, std::size_t size) noexcept
     {
         h_(data, size);
     }
@@ -166,32 +168,24 @@ public:
 
     ~basic_sha512_half_hasher()
     {
-        erase(std::integral_constant<bool, Secure>{});
+        if constexpr (Secure)
+            secure_erase(&h_, sizeof(h_));
     }
 
-    void
-    operator()(void const* data, std::size_t size) noexcept
+    void operator()(void const* data, std::size_t size) noexcept
     {
         h_(data, size);
     }
 
-    void
-    operator()(ustring_view sv) noexcept { (*this)(sv.data(), sv.size()); }
+    void operator()(ustring_view sv) noexcept
+    {
+        (*this)(sv.data(), sv.size());
+    }
 
     explicit operator result_type() noexcept
     {
         auto const digest = sha512_hasher::result_type(h_);
         return result_type(ustring_view(digest.data(), result_type::num_bytes));
-    }
-
-private:
-    inline void erase(std::false_type)
-    {
-    }
-
-    inline void erase(std::true_type)
-    {
-        secure_erase(&h_, sizeof(h_));
     }
 };
 
@@ -205,8 +199,7 @@ using sha512_half_hasher_s = detail::basic_sha512_half_hasher<true>;
 //------------------------------------------------------------------------------
 /** Returns the SHA512-Half of a series of objects. */
 template <class... Args>
-sha512_half_hasher::result_type
-sha512Half(Args const&... args)
+sha512_half_hasher::result_type sha512Half(Args const&... args)
 {
     sha512_half_hasher h;
     using beast::hash_append;
@@ -221,8 +214,7 @@ sha512Half(Args const&... args)
         input messages will be cleared.
 */
 template <class... Args>
-sha512_half_hasher_s::result_type
-sha512Half_s(Args const&... args)
+sha512_half_hasher_s::result_type sha512Half_s(Args const&... args)
 {
     sha512_half_hasher_s h;
     using beast::hash_append;

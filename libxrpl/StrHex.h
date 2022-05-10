@@ -3,19 +3,16 @@
 
 #include "Common.h"
 
-#include "libxrpl_export.h"
 #include <boost/algorithm/hex.hpp>
+#include "libxrpl_export.h"
 
 namespace xrpl {
 
 template <class FwdIt>
-std::string
-strHex(FwdIt begin, FwdIt end)
+std::string strHex(FwdIt begin, FwdIt end)
 {
     static_assert(
-        std::is_convertible<
-            typename std::iterator_traits<FwdIt>::iterator_category,
-            std::forward_iterator_tag>::value,
+        std::is_convertible<typename std::iterator_traits<FwdIt>::iterator_category, std::forward_iterator_tag>::value,
         "FwdIt must be a forward iterator");
     std::string result;
     result.reserve(2 * std::distance(begin, end));
@@ -24,15 +21,11 @@ strHex(FwdIt begin, FwdIt end)
 }
 
 template <class T, class = decltype(std::declval<T>().begin())>
-std::string
-strHex(T const& from)
+std::string strHex(T const& from)
 {
     return strHex(from.begin(), from.end());
 }
-        
 
+}  // namespace xrpl
 
-}
-
-
-#endif // LIBXRPL_STRHEX_H_INCLUDED
+#endif  // LIBXRPL_STRHEX_H_INCLUDED

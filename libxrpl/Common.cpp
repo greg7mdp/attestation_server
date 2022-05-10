@@ -7,16 +7,14 @@
 #include "Digest.h"
 #include "PublicKey.h"
 
-
 // -------------- doctest stuff -----------------------------
 #define DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL
 #define DOCTEST_CONFIG_IMPLEMENT
 #include <doctest/doctest.h>
 // -------------- end of doctest stuff ----------------------
 
-
-#include <openssl/crypto.h>
 #include <boost/endian/conversion.hpp>
+#include <openssl/crypto.h>
 
 namespace xrpl {
 
@@ -31,32 +29,27 @@ void secure_erase(ustring& sv)
     OPENSSL_cleanse(sv.data(), sv.size());
 }
 
-
-
 // ---------------- error ---------------------
 namespace detail {
 
-    [[noreturn]] void
-    accessViolation() noexcept
-    {
-        // dereference memory location zero
-        int volatile* j = 0;
-        (void)*j;
-        std::abort();
-    }
+[[noreturn]] void accessViolation() noexcept
+{
+    // dereference memory location zero
+    int volatile* j = 0;
+    (void)*j;
+    std::abort();
+}
 
 }  // namespace detail
 
-void
-LogThrow(std::string const& )
+void LogThrow(std::string const&)
 {
-    //JLOG(debugLog().warn()) << title;
+    // JLOG(debugLog().warn()) << title;
 }
 
-[[noreturn]] void
-LogicError(std::string const& s) noexcept
+[[noreturn]] void LogicError(std::string const& s) noexcept
 {
-    //JLOG(debugLog().fatal()) << s;
+    // JLOG(debugLog().fatal()) << s;
     std::cerr << "Logic error: " << s << std::endl;
     detail::accessViolation();
 }
@@ -92,8 +85,7 @@ ustring toBase58(AccountID const& v)
 }
 
 template <>
-std::optional<AccountID>
-parseBase58(ustring_view s)
+std::optional<AccountID> parseBase58(ustring_view s)
 {
     auto const result = decodeBase58Token(s, TokenType::AccountID);
     if (result.size() != AccountID::num_bytes)
@@ -136,8 +128,7 @@ parseBase58(ustring_view s)
         less secure than Bitcoin. So where there was no good reason
         to change something, it was not changed."
 */
-AccountID
-calcAccountID(PublicKey const& pk)
+AccountID calcAccountID(PublicKey const& pk)
 {
     static_assert(AccountID::num_bytes == sizeof(ripesha_hasher::result_type));
 
@@ -146,22 +137,19 @@ calcAccountID(PublicKey const& pk)
     return AccountID{static_cast<ripesha_hasher::result_type>(rsh)};
 }
 
-AccountID const&
-xrpAccount()
+AccountID const& xrpAccount()
 {
     static AccountID const account(zero);
     return account;
 }
 
-AccountID const&
-noAccount()
+AccountID const& noAccount()
 {
     static AccountID const account(1);
     return account;
 }
 
-bool
-to_issuer(AccountID& issuer, ustring_view s)
+bool to_issuer(AccountID& issuer, ustring_view s)
 {
     if (issuer.parseHex(s))
         return true;
@@ -191,8 +179,7 @@ AccountIDCache::AccountIDCache(std::size_t capacity) : capacity_(capacity)
     m1_.reserve(capacity_);
 }
 
-std::string
-AccountIDCache::toBase58(AccountID const& id) const
+std::string AccountIDCache::toBase58(AccountID const& id) const
 {
     std::lock_guard lock(mutex_);
     auto iter = m1_.find(id);
@@ -222,5 +209,4 @@ AccountIDCache::toBase58(AccountID const& id) const
 }
 #endif
 
-} // namespace xrpl
-
+}  // namespace xrpl

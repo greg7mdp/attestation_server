@@ -1,17 +1,17 @@
 #ifndef SERVER_H_INCLUDED
 #define SERVER_H_INCLUDED
 
+#include <array>
 #include <cstdint>
 #include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
-#include <array>
 
 #include <libxrpl/SecretKey.h>
 
-
-struct ServerConfig {
+struct ServerConfig
+{
     xrpl::PublicKey public_key;
     xrpl::SecretKey secret_key;
 
@@ -25,7 +25,6 @@ struct ServerConfig {
     xrpl::Port ws;
 };
 
-
 class Server
 {
 private:
@@ -33,10 +32,9 @@ private:
 
 public:
     Server();
-    
+
 private:
     void loadConfig();
 };
 
-
-#endif // SERVER_H_INCLUDED
+#endif  // SERVER_H_INCLUDED

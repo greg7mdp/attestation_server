@@ -1,14 +1,13 @@
 #include <SecretKey.h>
 #include <cstring>
-#include <functional>
 #include <doctest/doctest.h>
+#include <functional>
 
-#include <Secp256k1Context.h>
-#include "StrHex.h"
 #include "Digest.h"
-#include "rngfill.h"
+#include "StrHex.h"
 #include "csprng.h"
-
+#include "rngfill.h"
+#include <Secp256k1Context.h>
 
 //---------------------------------------------------------------------------------
 
@@ -31,16 +30,14 @@ SecretKey::SecretKey(ustring_view sv)
     std::memcpy(buf_, sv.data(), sizeof(buf_));
 }
 
-std::string
-SecretKey::to_string() const
+std::string SecretKey::to_string() const
 {
     return strHex(this->view());
 }
 
 namespace detail {
 
-void
-copy_uint32(std::uint8_t* out, std::uint32_t v)
+void copy_uint32(std::uint8_t* out, std::uint32_t v)
 {
     *out++ = v >> 24;
     *out++ = (v >> 16) & 0xff;
@@ -48,8 +45,7 @@ copy_uint32(std::uint8_t* out, std::uint32_t v)
     *out = v & 0xff;
 }
 
-uint256
-deriveDeterministicRootKey(Seed const& seed)
+uint256 deriveDeterministicRootKey(Seed const& seed)
 {
     // We fill this buffer with the seed and append a 32-bit "counter"
     // that counts how many attempts we've had to make to generate a
@@ -107,8 +103,7 @@ private:
     uint256 root_;
     std::array<std::uint8_t, 33> generator_;
 
-    uint256
-    calculateTweak(std::uint32_t seq) const
+    uint256 calculateTweak(std::uint32_t seq) const
     {
         // We fill the buffer with the generator, the provided sequence
         // and a 32-bit counter tracking the number of attempts we have
@@ -142,22 +137,16 @@ private:
     }
 
 public:
-    explicit Generator(Seed const& seed)
-        : root_(deriveDeterministicRootKey(seed))
+    explicit Generator(Seed const& seed) : root_(deriveDeterministicRootKey(seed))
     {
         secp256k1_pubkey pubkey;
-        if (secp256k1_ec_pubkey_create(
-                secp256k1Context(), &pubkey, root_.data()) != 1)
+        if (secp256k1_ec_pubkey_create(secp256k1Context(), &pubkey, root_.data()) != 1)
             LogicError("derivePublicKey: secp256k1_ec_pubkey_create failed");
 
         auto len = generator_.size();
 
         if (secp256k1_ec_pubkey_serialize(
-                secp256k1Context(),
-                generator_.data(),
-                &len,
-                &pubkey,
-                SECP256K1_EC_COMPRESSED) != 1)
+                secp256k1Context(), generator_.data(), &len, &pubkey, SECP256K1_EC_COMPRESSED) != 1)
             LogicError("derivePublicKey: secp256k1_ec_pubkey_serialize failed");
     }
 
@@ -168,15 +157,13 @@ public:
     }
 
     /** Generate the nth key pair. */
-    std::pair<PublicKey, SecretKey>
-    operator()(std::size_t ordinal) const
+    std::pair<PublicKey, SecretKey> operator()(std::size_t ordinal) const
     {
         // Generates Nth secret key:
         auto gsk = [this, tweak = calculateTweak(ordinal)]() {
             auto rpk = root_;
 
-            if (secp256k1_ec_seckey_tweak_add(
-                    secp256k1Context(), rpk.data(), tweak.data()) == 1)
+            if (secp256k1_ec_seckey_tweak_add(secp256k1Context(), rpk.data(), tweak.data()) == 1)
             {
                 SecretKey sk{rpk.view()};
                 secure_erase(rpk);
@@ -192,8 +179,7 @@ public:
 
 }  // namespace detail
 
-ustring
-signDigest(PublicKey const& pk, SecretKey const& sk, uint256 const& digest)
+ustring signDigest(PublicKey const& pk, SecretKey const& sk, uint256 const& digest)
 {
     if (publicKeyType(pk) != KeyType::secp256k1)
         LogicError("sign: secp256k1 required for digest signing");
@@ -211,8 +197,7 @@ signDigest(PublicKey const& pk, SecretKey const& sk, uint256 const& digest)
 
     unsigned char sig[72];
     size_t len = sizeof(sig);
-    if (secp256k1_ecdsa_signature_serialize_der(
-            secp256k1Context(), sig, &len, &sig_imp) != 1)
+    if (secp256k1_ecdsa_signature_serialize_der(secp256k1Context(), sig, &len, &sig_imp) != 1)
         LogicError("sign: secp256k1_ecdsa_signature_serialize_der failed");
 
     return ustring{sig, len};
@@ -225,14 +210,24 @@ extern "C" {
 typedef unsigned char curved25519_key[32];
 
 void ed25519_publickey(const ed25519_secret_key sk, ed25519_public_key pk);
-void ed25519_sign(const unsigned char *m, size_t mlen, const ed25519_secret_key sk, const ed25519_public_key pk, ed25519_signature RS);
-int ed25519_sign_open(const unsigned char *m, size_t mlen, const ed25519_public_key pk, const ed25519_signature RS);
-int ed25519_sign_open_batch(const unsigned char **m, size_t *mlen, const unsigned char **pk, const unsigned char **RS, size_t num, int *valid);
-void ed25519_randombytes_unsafe(void *out, size_t count);
+void ed25519_sign(
+    const unsigned char* m,
+    size_t mlen,
+    const ed25519_secret_key sk,
+    const ed25519_public_key pk,
+    ed25519_signature RS);
+int ed25519_sign_open(const unsigned char* m, size_t mlen, const ed25519_public_key pk, const ed25519_signature RS);
+int ed25519_sign_open_batch(
+    const unsigned char** m,
+    size_t* mlen,
+    const unsigned char** pk,
+    const unsigned char** RS,
+    size_t num,
+    int* valid);
+void ed25519_randombytes_unsafe(void* out, size_t count);
 }
 
-ustring
-sign(PublicKey const& pk, SecretKey const& sk, ustring_view m)
+ustring sign(PublicKey const& pk, SecretKey const& sk, ustring_view m)
 {
     auto const type = publicKeyType(pk);
     if (!type)
@@ -241,8 +236,7 @@ sign(PublicKey const& pk, SecretKey const& sk, ustring_view m)
     {
         case KeyType::ed25519: {
             ustring b(64, '\0');
-            ed25519_sign(
-                m.data(), m.size(), sk.data(), pk.data() + 1, b.data());
+            ed25519_sign(m.data(), m.size(), sk.data(), pk.data() + 1, b.data());
             return b;
         }
         case KeyType::secp256k1: {
@@ -262,10 +256,8 @@ sign(PublicKey const& pk, SecretKey const& sk, ustring_view m)
 
             unsigned char sig[72];
             size_t len = sizeof(sig);
-            if (secp256k1_ecdsa_signature_serialize_der(
-                    secp256k1Context(), sig, &len, &sig_imp) != 1)
-                LogicError(
-                    "sign: secp256k1_ecdsa_signature_serialize_der failed");
+            if (secp256k1_ecdsa_signature_serialize_der(secp256k1Context(), sig, &len, &sig_imp) != 1)
+                LogicError("sign: secp256k1_ecdsa_signature_serialize_der failed");
 
             return ustring{sig, len};
         }
@@ -274,8 +266,7 @@ sign(PublicKey const& pk, SecretKey const& sk, ustring_view m)
     }
 }
 
-SecretKey
-randomSecretKey()
+SecretKey randomSecretKey()
 {
     std::uint8_t buf[32];
     beast::rngfill(buf, sizeof(buf), crypto_prng());
@@ -284,8 +275,7 @@ randomSecretKey()
     return sk;
 }
 
-SecretKey
-generateSecretKey(KeyType type, Seed const& seed)
+SecretKey generateSecretKey(KeyType type, Seed const& seed)
 {
     if (type == KeyType::ed25519)
     {
@@ -306,30 +296,21 @@ generateSecretKey(KeyType type, Seed const& seed)
     LogicError("generateSecretKey: unknown key type");
 }
 
-PublicKey
-derivePublicKey(KeyType type, SecretKey const& sk)
+PublicKey derivePublicKey(KeyType type, SecretKey const& sk)
 {
     switch (type)
     {
         case KeyType::secp256k1: {
             secp256k1_pubkey pubkey_imp;
             if (secp256k1_ec_pubkey_create(
-                    secp256k1Context(),
-                    &pubkey_imp,
-                    reinterpret_cast<unsigned char const*>(sk.data())) != 1)
-                LogicError(
-                    "derivePublicKey: secp256k1_ec_pubkey_create failed");
+                    secp256k1Context(), &pubkey_imp, reinterpret_cast<unsigned char const*>(sk.data())) != 1)
+                LogicError("derivePublicKey: secp256k1_ec_pubkey_create failed");
 
             unsigned char pubkey[33];
             std::size_t len = sizeof(pubkey);
-            if (secp256k1_ec_pubkey_serialize(
-                    secp256k1Context(),
-                    pubkey,
-                    &len,
-                    &pubkey_imp,
-                    SECP256K1_EC_COMPRESSED) != 1)
-                LogicError(
-                    "derivePublicKey: secp256k1_ec_pubkey_serialize failed");
+            if (secp256k1_ec_pubkey_serialize(secp256k1Context(), pubkey, &len, &pubkey_imp, SECP256K1_EC_COMPRESSED) !=
+                1)
+                LogicError("derivePublicKey: secp256k1_ec_pubkey_serialize failed");
 
             return PublicKey{ustring_view{pubkey, len}};
         }
@@ -344,8 +325,7 @@ derivePublicKey(KeyType type, SecretKey const& sk)
     };
 }
 
-std::pair<PublicKey, SecretKey>
-generateKeyPair(KeyType type, Seed const& seed)
+std::pair<PublicKey, SecretKey> generateKeyPair(KeyType type, Seed const& seed)
 {
     switch (type)
     {
@@ -361,16 +341,14 @@ generateKeyPair(KeyType type, Seed const& seed)
     }
 }
 
-std::pair<PublicKey, SecretKey>
-randomKeyPair(KeyType type)
+std::pair<PublicKey, SecretKey> randomKeyPair(KeyType type)
 {
     auto const sk = randomSecretKey();
     return {derivePublicKey(type, sk), sk};
 }
-    
+
 template <>
-std::optional<SecretKey>
-parseBase58(TokenType type, ustring_view s)
+std::optional<SecretKey> parseBase58(TokenType type, ustring_view s)
 {
     auto const result = decodeBase58Token(s, type);
     if (result.empty())
@@ -378,14 +356,12 @@ parseBase58(TokenType type, ustring_view s)
     if (result.size() != 32)
         return std::nullopt;
     return SecretKey(ustring_view(result));
-}    
-        
-} // namespace xrpl
+}
 
+}  // namespace xrpl
 
 // ================================== TESTS =======================================
-namespace xrpl
-{
+namespace xrpl {
 
 class SecretKey_test
 {
@@ -402,44 +378,34 @@ public:
 
     // Ensure that verification does the right thing with
     // respect to the matrix of canonicality variables.
-    void
-    testCanonicality()
+    void testCanonicality()
     {
         // TEST_CASE("secp256k1: canonicality");
 
 #ifdef LATER
-        std::array<std::uint8_t, 32> const digestData{
-            0x34, 0xC1, 0x90, 0x28, 0xC8, 0x0D, 0x21, 0xF3, 0xF4, 0x8C, 0x93,
-            0x54, 0x89, 0x5F, 0x8D, 0x5B, 0xF0, 0xD5, 0xEE, 0x7F, 0xF4, 0x57,
-            0x64, 0x7C, 0xF6, 0x55, 0xF5, 0x53, 0x0A, 0x30, 0x22, 0xA7};
+        std::array<std::uint8_t, 32> const digestData{0x34, 0xC1, 0x90, 0x28, 0xC8, 0x0D, 0x21, 0xF3, 0xF4, 0x8C, 0x93,
+                                                      0x54, 0x89, 0x5F, 0x8D, 0x5B, 0xF0, 0xD5, 0xEE, 0x7F, 0xF4, 0x57,
+                                                      0x64, 0x7C, 0xF6, 0x55, 0xF5, 0x53, 0x0A, 0x30, 0x22, 0xA7};
 
-        std::array<std::uint8_t, 33> const pkData{
-            0x02, 0x50, 0x96, 0xEB, 0x12, 0xD3, 0xE9, 0x24, 0x23, 0x4E, 0x71,
-            0x62, 0x36, 0x9C, 0x11, 0xD8, 0xBF, 0x87, 0x7E, 0xDA, 0x23, 0x87,
-            0x78, 0xE7, 0xA3, 0x1F, 0xF0, 0xAA, 0xC5, 0xD0, 0xDB, 0xCF, 0x37};
+        std::array<std::uint8_t, 33> const pkData{0x02, 0x50, 0x96, 0xEB, 0x12, 0xD3, 0xE9, 0x24, 0x23, 0x4E, 0x71,
+                                                  0x62, 0x36, 0x9C, 0x11, 0xD8, 0xBF, 0x87, 0x7E, 0xDA, 0x23, 0x87,
+                                                  0x78, 0xE7, 0xA3, 0x1F, 0xF0, 0xAA, 0xC5, 0xD0, 0xDB, 0xCF, 0x37};
 
-        std::array<std::uint8_t, 32> const skData{
-            0xAA, 0x92, 0x14, 0x17, 0xE7, 0xE5, 0xC2, 0x99, 0xDA, 0x4E, 0xEC,
-            0x16, 0xD1, 0xCA, 0xA9, 0x2F, 0x19, 0xB1, 0x9F, 0x2A, 0x68, 0x51,
-            0x1F, 0x68, 0xEC, 0x73, 0xBB, 0xB2, 0xF5, 0x23, 0x6F, 0x3D};
+        std::array<std::uint8_t, 32> const skData{0xAA, 0x92, 0x14, 0x17, 0xE7, 0xE5, 0xC2, 0x99, 0xDA, 0x4E, 0xEC,
+                                                  0x16, 0xD1, 0xCA, 0xA9, 0x2F, 0x19, 0xB1, 0x9F, 0x2A, 0x68, 0x51,
+                                                  0x1F, 0x68, 0xEC, 0x73, 0xBB, 0xB2, 0xF5, 0x23, 0x6F, 0x3D};
 
         std::array<std::uint8_t, 71> const sig{
-            0x30, 0x45, 0x02, 0x21, 0x00, 0xB4, 0x9D, 0x07, 0xF0, 0xE9, 0x34,
-            0xBA, 0x46, 0x8C, 0x0E, 0xFC, 0x78, 0x11, 0x77, 0x91, 0x40, 0x8D,
-            0x1F, 0xB8, 0xB6, 0x3A, 0x64, 0x92, 0xAD, 0x39, 0x5A, 0xC2, 0xF3,
-            0x60, 0xF2, 0x46, 0x60, 0x02, 0x20, 0x50, 0x87, 0x39, 0xDB, 0x0A,
-            0x2E, 0xF8, 0x16, 0x76, 0xE3, 0x9F, 0x45, 0x9C, 0x8B, 0xBB, 0x07,
-            0xA0, 0x9C, 0x3E, 0x9F, 0x9B, 0xEB, 0x69, 0x62, 0x94, 0xD5, 0x24,
-            0xD4, 0x79, 0xD6, 0x27, 0x40};
+            0x30, 0x45, 0x02, 0x21, 0x00, 0xB4, 0x9D, 0x07, 0xF0, 0xE9, 0x34, 0xBA, 0x46, 0x8C, 0x0E, 0xFC, 0x78, 0x11,
+            0x77, 0x91, 0x40, 0x8D, 0x1F, 0xB8, 0xB6, 0x3A, 0x64, 0x92, 0xAD, 0x39, 0x5A, 0xC2, 0xF3, 0x60, 0xF2, 0x46,
+            0x60, 0x02, 0x20, 0x50, 0x87, 0x39, 0xDB, 0x0A, 0x2E, 0xF8, 0x16, 0x76, 0xE3, 0x9F, 0x45, 0x9C, 0x8B, 0xBB,
+            0x07, 0xA0, 0x9C, 0x3E, 0x9F, 0x9B, 0xEB, 0x69, 0x62, 0x94, 0xD5, 0x24, 0xD4, 0x79, 0xD6, 0x27, 0x40};
 
         std::array<std::uint8_t, 72> const non{
-            0x30, 0x46, 0x02, 0x21, 0x00, 0xB4, 0x9D, 0x07, 0xF0, 0xE9, 0x34,
-            0xBA, 0x46, 0x8C, 0x0E, 0xFC, 0x78, 0x11, 0x77, 0x91, 0x40, 0x8D,
-            0x1F, 0xB8, 0xB6, 0x3A, 0x64, 0x92, 0xAD, 0x39, 0x5A, 0xC2, 0xF3,
-            0x60, 0xF2, 0x46, 0x60, 0x02, 0x21, 0x00, 0xAF, 0x78, 0xC6, 0x24,
-            0xF5, 0xD1, 0x07, 0xE9, 0x89, 0x1C, 0x60, 0xBA, 0x63, 0x74, 0x44,
-            0xF7, 0x1A, 0x12, 0x9E, 0x47, 0x13, 0x5D, 0x36, 0xD9, 0x2A, 0xFD,
-            0x39, 0xB8, 0x56, 0x60, 0x1A, 0x01};
+            0x30, 0x46, 0x02, 0x21, 0x00, 0xB4, 0x9D, 0x07, 0xF0, 0xE9, 0x34, 0xBA, 0x46, 0x8C, 0x0E, 0xFC, 0x78, 0x11,
+            0x77, 0x91, 0x40, 0x8D, 0x1F, 0xB8, 0xB6, 0x3A, 0x64, 0x92, 0xAD, 0x39, 0x5A, 0xC2, 0xF3, 0x60, 0xF2, 0x46,
+            0x60, 0x02, 0x21, 0x00, 0xAF, 0x78, 0xC6, 0x24, 0xF5, 0xD1, 0x07, 0xE9, 0x89, 0x1C, 0x60, 0xBA, 0x63, 0x74,
+            0x44, 0xF7, 0x1A, 0x12, 0x9E, 0x47, 0x13, 0x5D, 0x36, 0xD9, 0x2A, 0xFD, 0x39, 0xB8, 0x56, 0x60, 0x1A, 0x01};
 
         auto const digest = uint256::fromVoid(digestData.data());
 
@@ -463,8 +429,7 @@ public:
 #endif
     }
 
-    void
-    testDigestSigning()
+    void testDigestSigning()
     {
         // TEST_CASE("secp256k1: digest signing & verification");
 
@@ -501,8 +466,7 @@ public:
         }
     }
 
-    void
-    testSigning(KeyType type)
+    void testSigning(KeyType type)
     {
         // TEST_CASE << to_string(type) << ": signing & verification";
 
@@ -529,8 +493,7 @@ public:
 
                 // swaps the smallest and largest elements in buffer
                 std::iter_swap(
-                    std::min_element(badData.begin(), badData.end()),
-                    std::max_element(badData.begin(), badData.end()));
+                    std::min_element(badData.begin(), badData.end()), std::max_element(badData.begin(), badData.end()));
 
                 // Wrong data: should fail
                 REQUIRE(!verify(pk, to_ustring_view(badData), sig, true));
@@ -548,33 +511,28 @@ public:
         }
     }
 
-    void
-    testBase58()
+    void testBase58()
     {
         // TEST_CASE("Base58");
 
         // Ensure that parsing some well-known secret keys works
         {
-            auto const sk1 = generateSecretKey(
-                KeyType::secp256k1, generateSeed("masterpassphrase"));
+            auto const sk1 = generateSecretKey(KeyType::secp256k1, generateSeed("masterpassphrase"));
 
             auto const sk2 = parseBase58<SecretKey>(
-                TokenType::NodePrivate,
-                to_ustring_view("pnen77YEeUd4fFKG7iycBWcwKpTaeFRkW2WFostaATy1DSupwXe"));
+                TokenType::NodePrivate, to_ustring_view("pnen77YEeUd4fFKG7iycBWcwKpTaeFRkW2WFostaATy1DSupwXe"));
             REQUIRE(!!sk2);
 
             bool same_keys = sk1 == *sk2;
             REQUIRE(same_keys);
         }
-        
+
 #ifdef LATER
         {
-            auto const sk1 = generateSecretKey(
-                KeyType::ed25519, generateSeed("masterpassphrase"));
+            auto const sk1 = generateSecretKey(KeyType::ed25519, generateSeed("masterpassphrase"));
 
             auto const sk2 = parseBase58<SecretKey>(
-                TokenType::NodePrivate,
-                to_ustring_view("paKv46LztLqK3GaKz1rG2nQGN6M4JLyRtxFBYFTw4wAVHtGys36"));
+                TokenType::NodePrivate, to_ustring_view("paKv46LztLqK3GaKz1rG2nQGN6M4JLyRtxFBYFTw4wAVHtGys36"));
             REQUIRE(sk2);
 
             REQUIRE(sk1 == *sk2);
@@ -584,8 +542,7 @@ public:
         // Try converting short, long and malformed data
         REQUIRE(!parseBase58<SecretKey>(TokenType::NodePrivate, to_ustring_view("")));
         REQUIRE(!parseBase58<SecretKey>(TokenType::NodePrivate, to_ustring_view(" ")));
-        REQUIRE(!parseBase58<SecretKey>(
-                    TokenType::NodePrivate, to_ustring_view("!35gty9mhju8nfjl")));
+        REQUIRE(!parseBase58<SecretKey>(TokenType::NodePrivate, to_ustring_view("!35gty9mhju8nfjl")));
 
         auto const good = toBase58(TokenType::NodePrivate, randomSecretKey());
 #ifdef LATER
@@ -599,8 +556,7 @@ public:
             while (!s.empty())
             {
                 s.erase(r(s) % s.size(), 1);
-                REQUIRE(
-                    !parseBase58<SecretKey>(TokenType::NodePrivate, s));
+                REQUIRE(!parseBase58<SecretKey>(TokenType::NodePrivate, s));
             }
         }
 #endif
@@ -620,8 +576,7 @@ public:
             {
                 auto s = good;
                 s[i % s.size()] = c;
-                REQUIRE(
-                    !parseBase58<SecretKey>(TokenType::NodePrivate, s));
+                REQUIRE(!parseBase58<SecretKey>(TokenType::NodePrivate, s));
             }
         }
 
@@ -632,8 +587,7 @@ public:
             for (auto c : std::string("ansrJqtv7"))
             {
                 s[0] = c;
-                REQUIRE(
-                    !parseBase58<SecretKey>(TokenType::NodePrivate, s));
+                REQUIRE(!parseBase58<SecretKey>(TokenType::NodePrivate, s));
             }
         }
 
@@ -660,8 +614,7 @@ public:
 
                 REQUIRE((si == sj) == (i == j));
 
-                auto const skj =
-                    parseBase58<SecretKey>(TokenType::NodePrivate, sj);
+                auto const skj = parseBase58<SecretKey>(TokenType::NodePrivate, sj);
                 bool check1 = skj && keys[j] == *skj;
                 bool check2 = (*ski == *skj) == (i == j);
                 REQUIRE(check1);
@@ -670,8 +623,7 @@ public:
         }
     }
 
-    void
-    testKeyDerivationSecp256k1()
+    void testKeyDerivationSecp256k1()
     {
         // TEST_CASE("secp256k1: key derivation");
 
@@ -680,8 +632,7 @@ public:
             auto const id = parseBase58<AccountID>(to_ustring_view(test.addr));
             REQUIRE(id);
 
-            auto kp =
-                generateKeyPair(KeyType::secp256k1, Seed{to_ustring_view(test.seed)});
+            auto kp = generateKeyPair(KeyType::secp256k1, Seed{to_ustring_view(test.seed)});
 
             REQUIRE(kp.first == PublicKey{to_ustring_view(test.pubkey)});
             REQUIRE(kp.second == SecretKey{to_ustring_view(test.seckey)});
@@ -689,8 +640,7 @@ public:
         }
     }
 
-    void
-    testKeyDerivationEd25519()
+    void testKeyDerivationEd25519()
     {
         // TEST_CASE("ed25519: key derivation");
 
@@ -699,8 +649,7 @@ public:
             auto const id = parseBase58<AccountID>(to_ustring_view(test.addr));
             REQUIRE(id);
 
-            auto kp =
-                generateKeyPair(KeyType::ed25519, Seed{to_ustring_view(test.seed)});
+            auto kp = generateKeyPair(KeyType::ed25519, Seed{to_ustring_view(test.seed)});
 
             REQUIRE(kp.first == PublicKey{to_ustring_view(test.pubkey)});
             REQUIRE(kp.second == SecretKey{to_ustring_view(test.seckey)});
@@ -1861,28 +1810,33 @@ inline static TestKeyData const ed25519TestVectors[] = {
 
 }  // namespace xrpl
 
-TEST_CASE_FIXTURE(xrpl::SecretKey_test, "Base58") {
+TEST_CASE_FIXTURE(xrpl::SecretKey_test, "Base58")
+{
     testBase58();
 }
 
-TEST_CASE_FIXTURE(xrpl::SecretKey_test, "secp256k1: key derivation") {
+TEST_CASE_FIXTURE(xrpl::SecretKey_test, "secp256k1: key derivation")
+{
     testKeyDerivationSecp256k1();
 }
 
-TEST_CASE_FIXTURE(xrpl::SecretKey_test, "secp256k1: signing & verification") {
+TEST_CASE_FIXTURE(xrpl::SecretKey_test, "secp256k1: signing & verification")
+{
     testSigning(xrpl::KeyType::secp256k1);
 }
 
-TEST_CASE_FIXTURE(xrpl::SecretKey_test, "secp256k1: digest signing & verification") {
+TEST_CASE_FIXTURE(xrpl::SecretKey_test, "secp256k1: digest signing & verification")
+{
     testDigestSigning();
 }
 
-TEST_CASE_FIXTURE(xrpl::SecretKey_test, "secp256k1: canonicality") {
+TEST_CASE_FIXTURE(xrpl::SecretKey_test, "secp256k1: canonicality")
+{
     testCanonicality();
 }
 
 /*
-  
+
 TEST_CASE_FIXTURE(xrpl::SecretKey_test, "ed25519: key derivation" {
     testKeyDerivationEd25519();
 }

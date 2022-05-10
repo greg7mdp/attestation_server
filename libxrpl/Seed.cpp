@@ -1,10 +1,9 @@
 #include "Seed.h"
+#include "Digest.h"
 #include "PublicKey.h"
 #include "SecretKey.h"
-#include "Digest.h"
-#include "rngfill.h"
 #include "csprng.h"
-
+#include "rngfill.h"
 
 namespace xrpl {
 
@@ -27,9 +26,7 @@ Seed::Seed(uint128 const& seed)
     std::memcpy(buf_.data(), seed.data(), buf_.size());
 }
 
-
-Seed
-randomSeed()
+Seed randomSeed()
 {
     std::array<std::uint8_t, 16> buffer;
     beast::rngfill(buffer.data(), buffer.size(), crypto_prng());
@@ -38,8 +35,7 @@ randomSeed()
     return seed;
 }
 
-Seed
-generateSeed(std::string_view passPhrase)
+Seed generateSeed(std::string_view passPhrase)
 {
     sha512_half_hasher_s h;
     h(passPhrase.data(), passPhrase.size());
@@ -48,8 +44,7 @@ generateSeed(std::string_view passPhrase)
 }
 
 template <>
-std::optional<Seed>
-parseBase58(ustring_view s)
+std::optional<Seed> parseBase58(ustring_view s)
 {
     auto const result = decodeBase58Token(s, TokenType::FamilySeed);
     if (result.empty())
@@ -122,6 +117,5 @@ parseRippleLibSeed(std::string const& s)
     return std::nullopt;
 }
 #endif
-    
-    
-} // namespace xrpl
+
+}  // namespace xrpl

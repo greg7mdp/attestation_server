@@ -2,19 +2,18 @@
 #define LIBXRPL_CSPRNG_H_INCLUDED
 
 #include <mutex>
-#include <random>
 #include <openssl/rand.h>
+#include <random>
 
 //---------------------------------------------------------------------------------
 namespace xrpl {
-    
+
 class csprng_engine
 {
 private:
     std::mutex mutex_;
 
-    void
-    mix(void* data, std::size_t size, double bitsPerByte)
+    void mix(void* data, std::size_t size, double bitsPerByte)
     {
         assert(data != nullptr);
         assert(size != 0);
@@ -37,10 +36,9 @@ public:
     {
         mix_entropy();
     }
-    
+
     /** Mix entropy into the pool */
-    void
-    mix_entropy(void* buffer = nullptr, std::size_t count = 0)
+    void mix_entropy(void* buffer = nullptr, std::size_t count = 0)
     {
         std::array<std::random_device::result_type, 128> entropy;
 
@@ -55,9 +53,7 @@ public:
         }
 
         // Assume 2 bits per byte for the system entropy:
-        mix(entropy.data(),
-            entropy.size() * sizeof(std::random_device::result_type),
-            2.0);
+        mix(entropy.data(), entropy.size() * sizeof(std::random_device::result_type), 2.0);
 
         // We want to be extremely conservative about estimating
         // how much entropy the buffer the user gives us contains
@@ -67,15 +63,13 @@ public:
     }
 
     /** Generate a random integer */
-    result_type
-    operator()()
+    result_type operator()()
     {
         result_type ret;
 
         std::lock_guard lock(mutex_);
 
-        auto const result =
-            RAND_bytes(reinterpret_cast<unsigned char*>(&ret), sizeof(ret));
+        auto const result = RAND_bytes(reinterpret_cast<unsigned char*>(&ret), sizeof(ret));
 
         if (result == 0)
             Throw<std::runtime_error>("Insufficient entropy");
@@ -84,28 +78,24 @@ public:
     }
 
     /** Fill a buffer with the requested amount of random data */
-    void
-    operator()(void* ptr, std::size_t count)
+    void operator()(void* ptr, std::size_t count)
     {
         std::lock_guard lock(mutex_);
 
-        auto const result =
-            RAND_bytes(reinterpret_cast<unsigned char*>(ptr), count);
+        auto const result = RAND_bytes(reinterpret_cast<unsigned char*>(ptr), count);
 
         if (result != 1)
             Throw<std::runtime_error>("Insufficient entropy");
     }
 
     /* The smallest possible value that can be returned */
-    static constexpr result_type
-    min()
+    static constexpr result_type min()
     {
         return std::numeric_limits<result_type>::min();
     }
 
     /* The largest possible value that can be returned */
-    static constexpr result_type
-    max()
+    static constexpr result_type max()
     {
         return std::numeric_limits<result_type>::max();
     }
@@ -124,7 +114,7 @@ inline csprng_engine& crypto_prng()
     static csprng_engine engine;
     return engine;
 }
-    
-} // namespace xrpl
+
+}  // namespace xrpl
 
 #endif
