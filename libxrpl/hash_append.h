@@ -307,31 +307,6 @@ template <class Hasher, class T, std::size_t N>
 std::enable_if_t<!is_contiguously_hashable<std::array<T, N>, Hasher>::value>
 hash_append(Hasher& h, std::array<T, N> const& a) noexcept;
 
-template <class Hasher, class... T>
-std::enable_if_t<!is_contiguously_hashable<std::tuple<T...>, Hasher>::value>
-hash_append(Hasher& h, std::tuple<T...> const& t) noexcept;
-
-template <class Hasher, class Key, class T, class Hash, class Pred, class Alloc>
-void
-hash_append(Hasher& h, std::unordered_map<Key, T, Hash, Pred, Alloc> const& m);
-
-template <class Hasher, class Key, class Hash, class Pred, class Alloc>
-void
-hash_append(Hasher& h, std::unordered_set<Key, Hash, Pred, Alloc> const& s);
-
-template <class Hasher, class Key, class Compare, class Alloc>
-std::enable_if_t<!is_contiguously_hashable<Key, Hasher>::value>
-hash_append(
-    Hasher& h,
-    boost::container::flat_set<Key, Compare, Alloc> const& v) noexcept;
-template <class Hasher, class Key, class Compare, class Alloc>
-std::enable_if_t<is_contiguously_hashable<Key, Hasher>::value>
-hash_append(
-    Hasher& h,
-    boost::container::flat_set<Key, Compare, Alloc> const& v) noexcept;
-template <class Hasher, class T0, class T1, class... T>
-void
-hash_append(Hasher& h, T0 const& t0, T1 const& t1, T const&... t) noexcept;
 
 // c-array
 
@@ -429,88 +404,7 @@ hash_append(
 {
     h(&(v.begin()), v.size() * sizeof(Key));
 }
-// tuple
 
-namespace detail {
-
-inline void
-for_each_item(...) noexcept
-{
-}
-
-template <class Hasher, class T>
-inline int
-hash_one(Hasher& h, T const& t) noexcept
-{
-    hash_append(h, t);
-    return 0;
-}
-
-template <class Hasher, class... T, std::size_t... I>
-inline void
-tuple_hash(
-    Hasher& h,
-    std::tuple<T...> const& t,
-    std::index_sequence<I...>) noexcept
-{
-    for_each_item(hash_one(h, std::get<I>(t))...);
-}
-
-}  // namespace detail
-
-template <class Hasher, class... T>
-inline std::enable_if_t<
-    !is_contiguously_hashable<std::tuple<T...>, Hasher>::value>
-hash_append(Hasher& h, std::tuple<T...> const& t) noexcept
-{
-    detail::tuple_hash(h, t, std::index_sequence_for<T...>{});
-}
-
-// shared_ptr
-
-template <class Hasher, class T>
-inline void
-hash_append(Hasher& h, std::shared_ptr<T> const& p) noexcept
-{
-    hash_append(h, p.get());
-}
-
-// chrono
-
-template <class Hasher, class Rep, class Period>
-inline void
-hash_append(Hasher& h, std::chrono::duration<Rep, Period> const& d) noexcept
-{
-    hash_append(h, d.count());
-}
-
-template <class Hasher, class Clock, class Duration>
-inline void
-hash_append(
-    Hasher& h,
-    std::chrono::time_point<Clock, Duration> const& tp) noexcept
-{
-    hash_append(h, tp.time_since_epoch());
-}
-
-// variadic
-
-template <class Hasher, class T0, class T1, class... T>
-inline void
-hash_append(Hasher& h, T0 const& t0, T1 const& t1, T const&... t) noexcept
-{
-    hash_append(h, t0);
-    hash_append(h, t1, t...);
-}
-
-// error_code
-
-template <class HashAlgorithm>
-inline void
-hash_append(HashAlgorithm& h, std::error_code const& ec)
-{
-    hash_append(h, ec.value(), &ec.category());
-}
 
 }  // namespace beast
 
