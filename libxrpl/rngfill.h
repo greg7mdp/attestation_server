@@ -11,13 +11,13 @@ namespace beast {
 template <class Generator>
 void rngfill(void* buffer, std::size_t bytes, Generator& g)
 {
-    using result_type = typename Generator::result_type;
     while (bytes > 0)
     {
         auto const v = g();
-        std::memcpy(buffer, &v, sizeof(v));
+        auto dest_size = std::min(bytes, sizeof(v));
+        std::memcpy(buffer, &v, dest_size);
         buffer = reinterpret_cast<std::uint8_t*>(buffer) + sizeof(v);
-        bytes -= std::min(bytes, sizeof(v));
+        bytes -= std::min(bytes, dest_size);
     }
 }
 
