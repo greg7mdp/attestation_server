@@ -525,7 +525,7 @@ public:
             CHECK(same_keys);
         }
 
-#ifdef LATER // ed25519 not supported yet
+#ifdef LATER  // ed25519 not supported yet
         {
             auto const sk1 = generateSecretKey(KeyType::ed25519, generateSeed("masterpassphrase"));
 

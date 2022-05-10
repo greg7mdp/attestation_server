@@ -348,7 +348,7 @@ template <class Hasher, class T, class Alloc>
 inline std::enable_if_t<is_contiguously_hashable<T, Hasher>::value> hash_append(
     Hasher& h,
     std::vector<T, Alloc> const& v) noexcept
-{ 
+{
     h(v.data(), v.size() * sizeof(T));
     hash_append(h, v.size());
 }

@@ -1,11 +1,11 @@
 
-#include <doctest/doctest.h>
 #include "PublicKey.h"
-#include "SecretKey.h"
 #include <boost/multiprecision/cpp_int.hpp>
 #include "Digest.h"
+#include "SecretKey.h"
 #include "StrHex.h"
 #include <Secp256k1Context.h>
+#include <doctest/doctest.h>
 
 namespace xrpl {
 
@@ -206,7 +206,7 @@ bool verify(PublicKey const& publicKey, ustring_view m, ustring_view sig, bool m
         {
             return verifyDigest(publicKey, sha512Half(m), sig, mustBeFullyCanonical);
         }
-#ifdef LATER // ed25519 not supported yet
+#ifdef LATER  // ed25519 not supported yet
         else if (*type == KeyType::ed25519)
         {
             if (!ed25519Canonical(sig))
@@ -250,8 +250,6 @@ std::optional<PublicKey> parseBase58(TokenType type, ustring_view s)
 
 }  // namespace xrpl
 
-
-
 // ================================== TESTS =======================================
 
 namespace xrpl {
@@ -278,8 +276,7 @@ public:
                     val['a' + i] = 10 + i;
                 }
             }
-            int
-            operator[](int i)
+            int operator[](int i)
             {
                 return val[i];
             }
@@ -534,17 +531,14 @@ public:
             "95ed"));
     }
 
-    void
-    testBase58(KeyType keyType)
+    void testBase58(KeyType keyType)
     {
         // Try converting short, long and malformed data
         CHECK(!parseBase58<PublicKey>(TokenType::NodePublic, to_ustring_view("")));
         CHECK(!parseBase58<PublicKey>(TokenType::NodePublic, to_ustring_view(" ")));
-        CHECK(
-            !parseBase58<PublicKey>(TokenType::NodePublic, to_ustring_view("!ty89234gh45")));
+        CHECK(!parseBase58<PublicKey>(TokenType::NodePublic, to_ustring_view("!ty89234gh45")));
 
-        auto const good = toBase58(
-            TokenType::NodePublic, derivePublicKey(keyType, randomSecretKey()));
+        auto const good = toBase58(TokenType::NodePublic, derivePublicKey(keyType, randomSecretKey()));
 
         // Short (non-empty) strings
         {
@@ -559,7 +553,7 @@ public:
                 CHECK(!parseBase58<PublicKey>(TokenType::NodePublic, s));
             }
         }
-        
+
         // Long strings
         for (std::size_t i = 1; i != 16; i++)
         {
@@ -613,8 +607,7 @@ public:
 
                 CHECK((si == sj) == (i == j));
 
-                auto const skj =
-                    parseBase58<PublicKey>(TokenType::NodePublic, sj);
+                auto const skj = parseBase58<PublicKey>(TokenType::NodePublic, sj);
                 bool check_same1 = skj && (keys[j] == *skj);
                 CHECK(check_same1);
 
@@ -624,20 +617,16 @@ public:
         }
     }
 
-    void
-    testBase58()
+    void testBase58()
     {
         // testcase("Base58: secp256k1");
 
         {
             auto const pk1 = derivePublicKey(
-                KeyType::secp256k1,
-                generateSecretKey(
-                    KeyType::secp256k1, generateSeed("masterpassphrase")));
+                KeyType::secp256k1, generateSecretKey(KeyType::secp256k1, generateSeed("masterpassphrase")));
 
             auto const pk2 = parseBase58<PublicKey>(
-                TokenType::NodePublic,
-                to_ustring_view("n94a1u4jAz288pZLtw6yFWVbi89YamiC6JBXPVUj5zmExe5fTVg9"));
+                TokenType::NodePublic, to_ustring_view("n94a1u4jAz288pZLtw6yFWVbi89YamiC6JBXPVUj5zmExe5fTVg9"));
             CHECK(pk2);
 
             CHECK(pk1 == *pk2);
@@ -646,16 +635,13 @@ public:
         testBase58(KeyType::secp256k1);
 
         // testcase("Base58: ed25519");
-#ifdef LATER // ed25519 not supported yet
+#ifdef LATER  // ed25519 not supported yet
         {
             auto const pk1 = derivePublicKey(
-                KeyType::ed25519,
-                generateSecretKey(
-                    KeyType::ed25519, generateSeed("masterpassphrase")));
+                KeyType::ed25519, generateSecretKey(KeyType::ed25519, generateSeed("masterpassphrase")));
 
             auto const pk2 = parseBase58<PublicKey>(
-                TokenType::NodePublic,
-                to_ustring_view("nHUeeJCSY2dM71oxM8Cgjouf5ekTuev2mwDpc374aLMxzDLXNmjf"));
+                TokenType::NodePublic, to_ustring_view("nHUeeJCSY2dM71oxM8Cgjouf5ekTuev2mwDpc374aLMxzDLXNmjf"));
             CHECK(pk2);
 
             CHECK(pk1 == *pk2);
@@ -665,15 +651,12 @@ public:
 #endif
     }
 
-    void
-    testMiscOperations()
+    void testMiscOperations()
     {
         // testcase("Miscellaneous operations");
 
         auto const pk1 = derivePublicKey(
-            KeyType::secp256k1,
-            generateSecretKey(
-                KeyType::secp256k1, generateSeed("masterpassphrase")));
+            KeyType::secp256k1, generateSecretKey(KeyType::secp256k1, generateSeed("masterpassphrase")));
 
         PublicKey pk2(pk1);
         CHECK(pk1 == pk2);
@@ -685,8 +668,7 @@ public:
         CHECK(pk1 == pk3);
     }
 
-    void
-    run()
+    void run()
     {
         testBase58();
         testCanonical();
